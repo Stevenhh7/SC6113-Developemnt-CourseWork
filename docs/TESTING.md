@@ -13,7 +13,7 @@ On 2026-10-07 the account-menu update passed 19 browser integration checks, all 
 | Exact amounts and safe errors | 4 passed | `tests/frontend.test.mjs`; `pnpm run test:frontend` |
 | Browser integration | 19 checks passed (2026-10-07) | `tests/browser.mjs`; `pnpm run test:browser` |
 
-Commands can be rerun from README. Browser/contract runs write `test-results/browser.json` and `test-results/contract-gas.json`, which are ignored local evidence. No screenshot or final PDF is produced. Third-party Web3.py dependencies may emit a deprecation warning; it does not change assertions. Solidity warns about `selfdestruct` in the **test-only forced-ETH helper**, not the business contract.
+Commands can be rerun from README. Browser/contract runs write `test-results/browser.json` and `test-results/contract-gas.json`, which are ignored runtime evidence; copies of the observed browser checks and local gas measurements are retained in `docs/evidence/` for the report. Automated suites produce no screenshots or final PDF. Third-party Web3.py dependencies may emit a deprecation warning; it does not change assertions. Solidity warns about `selfdestruct` in the **test-only forced-ETH helper**, not the business contract.
 
 ## Contract coverage
 
@@ -64,7 +64,7 @@ The automated browser runs the actual rendered application with no screenshots:
 18. The second authorized account deposits and redeems 17 wei while the first address remains first in `eth_accounts`; actual contract balances prove the selected signer is used. The mobile menu stays within a 390px viewport.
 19. Reload restores an authorized account choice; when that address is no longer exposed, connection falls back to an exposed account rather than trusting browser storage.
 
-The simulated provider supports controlled rejection/account/network changes but cannot verify MetaMask extension permissions, popup UI, provider-specific behavior or Sepolia latency. Those checks remain in the live acceptance list below.
+The simulated provider supports controlled rejection/account/network changes but cannot verify MetaMask extension permissions, popup UI, provider-specific behavior or Sepolia latency. The student's separate live acceptance is described below.
 
 ## Gas and performance evaluation
 
@@ -76,7 +76,7 @@ Observed receipt gas in the pinned local compiler/optimizer configuration:
 | Partial redemption | 50,282 | Redeem 333 of 1,000 wei |
 | Full redemption | 50,272 | Redeem all 999 wei |
 
-These values come from `receipt.gasUsed`, not estimates or invented Sepolia measurements. Actual cost is `gasUsed × effectiveGasPrice`, in wei. Later deposits, state changes, compiler changes and the target network can alter gas. Network gas is independent of the zero platform fee; redeeming principal does not reimburse gas.
+These local values come from `receipt.gasUsed`. Separately verified Sepolia receipts used 245,994 gas for a 0.003 ETH deposit, 53,700 for a 0.001 ETH partial redemption and 50,912 for the remaining 0.002 ETH exit. Actual costs were respectively 622855710866760, 132064592365200 and 127495073925600 wei. See `docs/DEPLOYMENT.md` and raw evidence. Local and Sepolia cases use different amounts and execution environments and are not one controlled comparison. Actual cost is `gasUsed × effectiveGasPrice`, in wei. Network gas is independent of the zero platform fee; redeeming principal does not reimburse gas.
 
 State reads are constant-size contract calls. Each history request scans a bounded block window in bounded RPC chunks, defaults 5,000/1,000, and fetches timestamps only for returned records. This controls individual request size but repeated older pages still depend on activity age and RPC capacity. There is no database/indexer; no load test, production latency measurement or concurrent-user throughput claim is made. Compare actual Sepolia receipt gas/cost and Render read timings during live acceptance if discussing production performance in the report.
 
@@ -86,11 +86,11 @@ The UI explains the fixed ratio, testnet, absence of returns and separate gas co
 
 Security controls include wallet-side signing, no backend key, caller-bound withdrawals, no deployer privilege, reentrancy lock, rollback on ETH transfer failure, exact integer accounting, non-transferable shares, read-only validated APIs, runtime bytecode/network checks, safe provider errors and a restrictive Content Security Policy. Public chain addresses/activity are not private; no user identity/profile database is stored. One mined confirmation is not chain finality. External RPC failures and wallet extensions remain trust/availability dependencies.
 
-## Live acceptance still required
+## Live acceptance on 7 October 2026
 
-The student's Sepolia deployment is now confirmed, with runtime bytecode and live local Flask pool/position/history reads verified. See `docs/DEPLOYMENT.md`. Wallet deposits/redemptions and Render publication remain pending; the local automated suite results above are unchanged.
+The student confirmed completing the functional tests with actual MetaMask on the public Render site. Independent read-only checks verified hosted configuration, pool, position and history, as well as the successful deposit/partial/full redemption receipts. See `docs/DEPLOYMENT.md` and `docs/evidence/live-validation-2026-10-07.json`. These HTTPS/API checks do not independently reproduce every wallet popup or invalid-input interaction. Seven student-supplied original screenshots now support live UI acceptance and are stored with hashes in `report/screenshots/`.
 
-Use a funded Sepolia MetaMask account and the actual public Render URL. Record real hashes/address/blocks; do not substitute local test evidence for these results.
+The following scenarios remain the acceptance checklist for reproducibility. The student reports they passed; the report distinguishes that statement from automated local checks and available chain evidence.
 
 | Step | Expected outcome |
 | --- | --- |
@@ -104,4 +104,4 @@ Use a funded Sepolia MetaMask account and the actual public Render URL. Record r
 | Refresh / Render restart | Same confirmed chain-backed position/history |
 | RPC outage / delayed confirmation | Error/unknown result remains retryable; no false success |
 
-The student's screenshots should capture the actual deployment, connection, success/invalid input, holdings, redemption, history and backend response. PDF report and image capture are outside this request. Consult the source assignment for final submission details.
+The seven screenshots cover deployment, connection, successful deposits/redemptions and full history, a rejected negative input, zero holdings after redemption, pool API data and Render Live deployment. The API image records 0.04 ETH at block 11857366; the redemption image records zero personal shares/principal at block 11857372. These are different snapshots. All originals are included in `report/MicroInvest_Report.tex` and the source ZIP; the final 8-page PDF has been compiled and visually checked at the student's request, with evidence in `docs/evidence/report-build-2026-10-07.json`. The remaining submission steps are in `report/`.

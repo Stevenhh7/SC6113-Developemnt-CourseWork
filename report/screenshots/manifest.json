@@ -1,0 +1,74 @@
+{
+  "screenshots": [
+    {
+      "number": 1,
+      "file": "01-deployment.png",
+      "width": 1579,
+      "height": 650,
+      "sha256": "260bbb046c20db59c967dcb7f5fac27b3346eea76e0d948833253b6f993c63e0",
+      "caption": "Deployment confirmation showing Sepolia chain ID 11155111, the deployed contract address and block 11856501.",
+      "receivedDate": "2026-10-07",
+      "source": "Student supplied original screenshot"
+    },
+    {
+      "number": 2,
+      "file": "02-wallet.png",
+      "width": 830,
+      "height": 600,
+      "sha256": "d868174cdf947a18ccaa83f5fc6ccd7b64b367bfc820882743ac2a4ab8f9c2f0",
+      "caption": "Connected MetaMask account on Sepolia with a second authorized account available in the account menu.",
+      "receivedDate": "2026-10-07",
+      "source": "Student supplied original screenshot"
+    },
+    {
+      "number": 3,
+      "file": "03-history.png",
+      "width": 1856,
+      "height": 1163,
+      "sha256": "998add5ca88a8725fde41858ec6a9c307ee42effaad56d117977c76e1385bcd9",
+      "caption": "Complete activity page showing confirmed deposits and redemptions, including the 0.003 ETH deposit, 0.001 ETH partial redemption and 0.002 ETH full exit.",
+      "receivedDate": "2026-10-07",
+      "source": "Student supplied original screenshot"
+    },
+    {
+      "number": 4,
+      "file": "04-invalid-input.png",
+      "width": 917,
+      "height": 715,
+      "sha256": "8bfc514b10344ea5f6f3b3572df8f5f7e5ed3c2c701b7e01eceb87f7cb7f735d",
+      "caption": "A negative deposit amount of -1 ETH with a message requiring a positive ETH amount.",
+      "receivedDate": "2026-10-07",
+      "source": "Student supplied original screenshot"
+    },
+    {
+      "number": 6,
+      "file": "06-redemption.png",
+      "width": 1863,
+      "height": 1117,
+      "sha256": "e4948d8d59027b7b96b12b677a9d2f84b9b06980019fe47982b7a3a2d21d46db",
+      "caption": "Confirmed redemption at block 11857372 with zero personal shares and zero redeemable principal.",
+      "receivedDate": "2026-10-07",
+      "source": "Student supplied original screenshot"
+    },
+    {
+      "number": 7,
+      "file": "07-backend.png",
+      "width": 463,
+      "height": 318,
+      "sha256": "b6fbdf138b2f17b8d9d8313b7cd56601a8d1b6618ab72ceabcec28613c259e24",
+      "caption": "Pool API at block 11857366: 0.04 ETH principal and contract balance, zero excess and solvent true, before the later redemption.",
+      "receivedDate": "2026-10-07",
+      "source": "Student supplied original screenshot"
+    },
+    {
+      "number": 8,
+      "file": "08-render.png",
+      "width": 1942,
+      "height": 1232,
+      "sha256": "9a75e0e5c0177ec16f36d37ff550f69bb8281a51fbbd5fef43ca13eab0be905c",
+      "caption": "Render deployment succeeded and Live for commit b65f9c3, with Gunicorn startup logs and the public service URL.",
+      "receivedDate": "2026-10-07",
+      "source": "Student supplied original screenshot"
+    }
+  ]
+}

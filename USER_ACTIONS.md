@@ -4,7 +4,9 @@
 
 连接后点击右上角钱包地址，即可在下拉菜单切换已授权账户。若只有一个账户，点击 **Manage accounts in MetaMask**，在钱包中授权其他账户后再切换；每笔投入、赎回由当前选择的账户签名。首页和完整记录页均已支持。刷新会恢复仍有授权的账户选择；切换网络后可使用菜单中的 **Reconnect wallet** 重新连接。真实 MetaMask 的授权弹窗仍需要你在自己的浏览器中确认。
 
-**Sepolia 合约已由你通过 MetaMask 部署成功，并已独立核验成功回执与运行字节码。** 地址为 `0xE560121978f80c390f6B0d091E9579A2812Cb3DD`，部署区块为 `11856501`。本地 `.env` 与公开部署 JSON 已配置；不要再次部署同一演示所用资金池。尚需实际投入/赎回验证和 Render 上线。以下部署步骤作为重建参考；无需把私钥、助记词或账号密码发给我。PDF 报告和截图按照你的要求没有制作。
+**Sepolia 合约与 Render 网站均已上线。** 合约地址为 `0xE560121978f80c390f6B0d091E9579A2812Cb3DD`，部署区块为 `11856501`。2026-10-07 你确认在 [Render 网站](https://sc6113-developemnt-coursework.onrender.com/) 完成了实际 MetaMask 功能测试，全部正常；独立只读核验也确认了线上 API、投入与部分/全部赎回回执。证据已保存于 `docs/evidence/`。以下部署步骤保留为重建参考，继续使用已部署资金池即可。
+
+**目前只需最后查看成品并提交。** 英文 LaTeX 已准备于 [report/MicroInvest_Report.tex](report/MicroInvest_Report.tex)，含全部 13 个章节、Ji Chengyu/G2608005K、架构图、真实测试数据及七张原始截图。完整源码与图片包为 [report/MicroInvest_LaTeX.zip](report/MicroInvest_LaTeX.zip)。按你最新要求，已生成 [8 页 PDF](report/MicroInvest_Report.pdf)，全部章节与截图保留，已逐页检查；截图已收齐，无需再补。具体记录见 [report/SCREENSHOT_CHECKLIST.md](report/SCREENSHOT_CHECKLIST.md)，最终检查见 [report/SUBMISSION_CHECKLIST.md](report/SUBMISSION_CHECKLIST.md)。
 
 ## 1 先在 VS Code 打开项目
 
@@ -33,15 +35,15 @@
 
 `/healthz` 成功只代表 Web 服务运行；真实链上连接请检查 `/api/pool`。具体设置与故障排查见 README。当前没有替你选择付费方案或修改远程仓库。
 
-## 4 收集真实线上截图与测试记录
+## 4 真实线上截图与测试记录（已完成）
 
-截图由你完成，至少覆盖作业规定的部署、钱包连接、成功交易、非法输入，再补充个人持仓、部分/全部赎回、交易历史与后端 API 响应。建议同时保存对应 Sepolia Etherscan 哈希和实际 Gas 数据。不要在截图中暴露助记词、私钥、RPC 密钥或平台环境变量秘密。
+七张原图已保存于 `report/screenshots/` 并加入报告，覆盖部署、钱包、成功交易/完整历史、非法输入、赎回后零持仓、API 和 Render Live。图注已核对；API 与赎回状态来自不同区块。尺寸及 SHA-256 见 `manifest.json`，实际交易回执与 Gas 见 `docs/evidence/`。
 
 [docs/TESTING.md](docs/TESTING.md) 已整理本地测试结果、安全性、可用性、Gas 数据和线上验收表，可用于你的报告资料。自动浏览器测试使用模拟钱包，不能代替真实 MetaMask/Sepolia 的截图与验证。没有真实新手用户参与的可用性研究，不要在报告里声称做过用户研究。
 
 ## 5 完成英文 PDF 报告并提交
 
-按原 Word 要求完成 **5–8 页英文 PDF**，覆盖全部 13 个部分：Introduction、Problem Statement、Objectives、System Architecture、Technologies Used、Smart Contract Design、Application Design、Implementation、Testing and Results、Challenges Encountered、Limitations、Future Improvements、Conclusion。
+英文 LaTeX 正文、截图及 PDF 已完成。`report/MicroInvest_Report.pdf` 共 **8 页**，符合原 Word 的 5–8 页要求；已逐页检查图文，覆盖全部 13 个部分：Introduction、Problem Statement、Objectives、System Architecture、Technologies Used、Smart Contract Design、Application Design、Implementation、Testing and Results、Challenges Encountered、Limitations、Future Improvements、Conclusion。按你最新要求使用本机 TeX Live 编译两次，无未解析引用或越界警告。若以后修改源码，解压报告 ZIP、保持 `screenshots/` 在 `.tex` 旁边，再用 pdfLaTeX 编译两次。
 
 可引用 `docs/ARCHITECTURE.md` 的架构/接口、`docs/TESTING.md` 的实际测试和 Gas，以及你的线上证据。明确项目是单资金池投资流程原型，只实现本金与份额，不产生收益或市场策略。不要把本地链结果写成 Sepolia 上线结果。
 

@@ -1,0 +1,24 @@
+{
+  "environment": "local Hardhat + Flask + simulated EIP-1193 wallet",
+  "checks": [
+    "Flask verifies deployed bytecode and serves real chain data",
+    "Wallet connection and initial position",
+    "Wallet menu lists permitted accounts, supports keyboard control and preserves selection on permission rejection",
+    "Input validation, deposit, mined confirmation and exact shares",
+    "Excess withdrawal rejection and partial redemption",
+    "Account switching isolates positions and histories",
+    "Full exit and event-backed history",
+    "Wallet rejection does not report success or alter chain state",
+    "Wrong network disables writes and reconnection restores them",
+    "Backend restart restores history from chain without a database",
+    "Overview displays only the newest five confirmed records",
+    "All-activity page preserves the wallet, paginates every record and handles refresh/account changes",
+    "All-activity wallet menu switches the viewed account and updates its URL",
+    "Reload remembers an authorized selection and falls back when that account is no longer exposed",
+    "Second permitted account signs deposits and redemptions without relying on the first eth_accounts entry",
+    "Mobile layout does not overflow",
+    "Browser wallet deployment produces confirmed address and deployment block",
+    "RPC failure becomes an explicit error and disables writes",
+    "No browser script errors"
+  ]
+}

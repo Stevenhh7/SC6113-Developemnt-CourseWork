@@ -14,4 +14,12 @@ deployments/localhost.json
 test-results/
 .DS_Store
 pytest-cache-files-*/
+tmp/pdfs/
+report/*.aux
+report/*.log
+report/*.out
+report/*.toc
+report/*.fls
+report/*.fdb_latexmk
+report/*.synctex.gz
 

@@ -1,0 +1,9 @@
+{
+  "environment": "Hardhat local",
+  "compiler": "0.8.30",
+  "gas": {
+    "deposit": "71884",
+    "partialWithdrawal": "50282",
+    "fullWithdrawal": "50272"
+  }
+}

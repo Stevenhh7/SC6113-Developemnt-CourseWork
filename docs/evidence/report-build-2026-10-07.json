@@ -1,0 +1,15 @@
+{
+  "date": "2026-10-07",
+  "timezone": "Asia/Shanghai",
+  "engine": "pdfLaTeX, installed TeX Live 2024",
+  "finalCompilePasses": 2,
+  "pdf": "report/MicroInvest_Report.pdf",
+  "pages": 8,
+  "requiredSections": 13,
+  "screenshots": 7,
+  "visualReview": "All eight final pages reviewed; latest diagram updates inspected and other rendered pages unchanged.",
+  "undefinedReferences": false,
+  "overfullBoxes": false,
+  "pdfSha256": "895cbd8c0f99432339f8a26af7680a54af644ce2a574ed3c2bbf61a03fb35fae",
+  "texSha256": "b92135432a15134ac610ea0eef86a61cdd4ef75908d1e53e5930034dc2f97da2"
+}

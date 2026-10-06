@@ -8,7 +8,7 @@ MicroInvest helps investing beginners understand a small investment's full on-ch
 
 The Solidity contract, Flask APIs, English HTML/CSS/JavaScript UI, wallet deployment page, local developer runner, automated tests, documentation and Render configuration are implemented. The baseline suites passed on 2026-10-06: 12 contract tests, 17 backend tests, 4 amount/error tests and 15 browser integration checks. The account-menu update was checked on 2026-10-07 with 19 browser checks, 17 backend tests and 4 amount/error tests passing. See [testing and evaluation](docs/TESTING.md).
 
-**The contract is now deployed on Sepolia.** The student signed the deployment through MetaMask; its successful creation receipt and exact runtime bytecode were independently checked through Sepolia RPC on 2026-10-06. Public metadata is in `deployments/sepolia.json`; see [deployment evidence](docs/DEPLOYMENT.md). The live deposit/redemption flow and public Render deployment still require the student's wallet/account actions. Follow the deployment steps below and [the student action checklist](USER_ACTIONS.md). PDF report and screenshots are excluded from this implementation request and remain the student's work.
+**The contract and website are deployed.** The student signed the Sepolia deployment through MetaMask; its creation receipt and exact runtime bytecode were independently checked on 2026-10-06. On 2026-10-07, the student confirmed successful functional testing on [the public Render application](https://sc6113-developemnt-coursework.onrender.com/). Read-only hosted API checks and successful deposit/redemption receipts are saved in `docs/evidence/`; see [deployment evidence](docs/DEPLOYMENT.md). The [LaTeX report](report/MicroInvest_Report.tex) contains all 13 required sections and seven original student screenshots. The [8-page PDF](report/MicroInvest_Report.pdf) has been compiled and visually checked, with an editable [source and images ZIP](report/MicroInvest_LaTeX.zip); see [report instructions](report/README.md) and [the handoff checklist](report/SUBMISSION_CHECKLIST.md).
 
 ## Technology and repository
 
@@ -174,6 +174,6 @@ If the setup banner appears, check address/block/RPC configuration. If a wrong-c
 
 ## Coursework handoff
 
-See [Plan.md](Plan.md) for requirement coverage, [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for design/API and [USER_ACTIONS.md](USER_ACTIONS.md) for the remaining account, live verification, PDF and screenshot tasks. Include source files, README, contract artifact, deployment metadata, tests and your final evidence when submitting. Exclude `.env`, `.venv`, `node_modules`, package caches and any wallet credentials.
+See [Plan.md](Plan.md) for requirement coverage, [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for design/API and [USER_ACTIONS.md](USER_ACTIONS.md) for final review and course submission. Include source files, README, contract artifact, deployment metadata, tests and your final evidence when submitting. Exclude `.env`, `.venv`, `node_modules`, package caches and any wallet credentials.
 
 Implementation tooling references: [Hardhat documentation](https://hardhat.org/docs/getting-started), [custom Solidity compiler](https://hardhat.org/docs/cookbook/custom-solidity-compiler), [Render Flask deployment](https://render.com/docs/deploy-flask).

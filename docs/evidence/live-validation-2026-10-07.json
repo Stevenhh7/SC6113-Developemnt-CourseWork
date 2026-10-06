@@ -1,0 +1,239 @@
+{
+  "verification": "Read-only HTTPS checks against the public Render application",
+  "studentAcceptance": {
+    "date": "2026-10-07",
+    "environment": "Render + MetaMask + Sepolia",
+    "result": "Student reported all functional tests passed"
+  },
+  "baseUrl": "https://sc6113-developemnt-coursework.onrender.com",
+  "participant": "0xc63A507a39C37CB4C752BA56408138386D06146f",
+  "deployment": {
+    "name": "sepolia",
+    "chainId": 11155111,
+    "address": "0xE560121978f80c390f6B0d091E9579A2812Cb3DD",
+    "deploymentBlock": 11856501,
+    "transactionHash": "0x45dba804763f4d53c4da30957b3d4da0f02dd15eecb65762a904926f99efd2ea",
+    "deployer": "0xc63A507a39C37CB4C752BA56408138386D06146f",
+    "compiler": "0.8.30",
+    "gasUsed": "1814581"
+  },
+  "requests": {
+    "/": {
+      "url": "https://sc6113-developemnt-coursework.onrender.com/",
+      "httpStatus": 200,
+      "queriedAtUtc": "2026-10-06T17:20:39.204567+00:00",
+      "elapsedSeconds": 1.28,
+      "data": {
+        "walletMenu": true,
+        "fullActivityLink": true,
+        "title": "MicroInvest \u00b7 Start small. Understand every step."
+      }
+    },
+    "/healthz": {
+      "url": "https://sc6113-developemnt-coursework.onrender.com/healthz",
+      "httpStatus": 200,
+      "queriedAtUtc": "2026-10-06T17:20:38.813673+00:00",
+      "elapsedSeconds": 0.888,
+      "data": {
+        "app": "MicroInvest",
+        "configured": true,
+        "status": "ok"
+      }
+    },
+    "/api/config": {
+      "url": "https://sc6113-developemnt-coursework.onrender.com/api/config",
+      "httpStatus": 200,
+      "queriedAtUtc": "2026-10-06T17:20:38.813673+00:00",
+      "elapsedSeconds": 0.888,
+      "data": {
+        "appName": "MicroInvest",
+        "chainHex": "0xaa36a7",
+        "chainId": 11155111,
+        "chainName": "Sepolia",
+        "configured": true,
+        "contractAddress": "0xE560121978f80c390f6B0d091E9579A2812Cb3DD",
+        "deploymentBlock": 11856501,
+        "explorerUrl": "https://sepolia.etherscan.io"
+      }
+    },
+    "/api/pool": {
+      "url": "https://sc6113-developemnt-coursework.onrender.com/api/pool",
+      "httpStatus": 200,
+      "queriedAtUtc": "2026-10-06T17:20:40.475429+00:00",
+      "elapsedSeconds": 2.549,
+      "data": {
+        "blockNumber": 11857284,
+        "contractBalanceWei": "0",
+        "excessWei": "0",
+        "principalEth": "0",
+        "principalWei": "0",
+        "solvent": true,
+        "totalShares": "0",
+        "totalSharesUnits": "0"
+      }
+    },
+    "/api/position/0xc63A507a39C37CB4C752BA56408138386D06146f": {
+      "url": "https://sc6113-developemnt-coursework.onrender.com/api/position/0xc63A507a39C37CB4C752BA56408138386D06146f",
+      "httpStatus": 200,
+      "queriedAtUtc": "2026-10-06T17:20:40.946987+00:00",
+      "elapsedSeconds": 2.133,
+      "data": {
+        "address": "0xc63A507a39C37CB4C752BA56408138386D06146f",
+        "blockNumber": 11857284,
+        "redeemableEth": "0",
+        "redeemableWei": "0",
+        "shares": "0",
+        "sharesUnits": "0",
+        "walletBalanceEth": "0.142136643316924401",
+        "walletBalanceWei": "142136643316924401"
+      }
+    },
+    "/api/history/0xc63A507a39C37CB4C752BA56408138386D06146f?limit=50": {
+      "url": "https://sc6113-developemnt-coursework.onrender.com/api/history/0xc63A507a39C37CB4C752BA56408138386D06146f?limit=50",
+      "httpStatus": 200,
+      "queriedAtUtc": "2026-10-06T17:20:42.023963+00:00",
+      "elapsedSeconds": 3.211,
+      "data": {
+        "items": [
+          {
+            "amountEth": "0.03",
+            "amountWei": "30000000000000000",
+            "blockNumber": 11856897,
+            "confirmations": 388,
+            "logIndex": 92,
+            "sharesAfter": "0",
+            "timestamp": 1791302424,
+            "transactionHash": "0x039d0ff1bd7d039e8b5ed7fee2704c8f57686236041368d8bc29829c543a4be8",
+            "type": "withdrawal"
+          },
+          {
+            "amountEth": "0.03",
+            "amountWei": "30000000000000000",
+            "blockNumber": 11856893,
+            "confirmations": 392,
+            "logIndex": 72,
+            "sharesAfter": "0.03",
+            "timestamp": 1791302376,
+            "transactionHash": "0xd88ece103eb7a85f0552fd46c23c0cedf785ea1f903c90b405b887b3b545741d",
+            "type": "withdrawal"
+          },
+          {
+            "amountEth": "0.04",
+            "amountWei": "40000000000000000",
+            "blockNumber": 11856891,
+            "confirmations": 394,
+            "logIndex": 28,
+            "sharesAfter": "0.06",
+            "timestamp": 1791302352,
+            "transactionHash": "0xcbc9bf36566d0cf9af0c81f579473aefa452e7e3772545aeeb73aa381ee8dcb0",
+            "type": "deposit"
+          },
+          {
+            "amountEth": "0.02",
+            "amountWei": "20000000000000000",
+            "blockNumber": 11856882,
+            "confirmations": 403,
+            "logIndex": 113,
+            "sharesAfter": "0.02",
+            "timestamp": 1791302244,
+            "transactionHash": "0x4c20b83d92e5347c44af2f81691b0615c5e33f29ad4066b1fa9d75c795e941fa",
+            "type": "withdrawal"
+          },
+          {
+            "amountEth": "0.04",
+            "amountWei": "40000000000000000",
+            "blockNumber": 11856875,
+            "confirmations": 410,
+            "logIndex": 39,
+            "sharesAfter": "0.04",
+            "timestamp": 1791302160,
+            "transactionHash": "0x254a987bc1273bf020d104349c65c9d40d5c167044b066bd91772910c95b3726",
+            "type": "deposit"
+          },
+          {
+            "amountEth": "0.002",
+            "amountWei": "2000000000000000",
+            "blockNumber": 11856705,
+            "confirmations": 580,
+            "logIndex": 31,
+            "sharesAfter": "0",
+            "timestamp": 1791300024,
+            "transactionHash": "0xe47ab65933833624b02fddd362fcce5ade0c734d1626790b3239831ff4f06e9a",
+            "type": "withdrawal"
+          },
+          {
+            "amountEth": "0.001",
+            "amountWei": "1000000000000000",
+            "blockNumber": 11856703,
+            "confirmations": 582,
+            "logIndex": 66,
+            "sharesAfter": "0.002",
+            "timestamp": 1791300000,
+            "transactionHash": "0xcb3ebbe7044daf65d6129d01cb936cfaa9ccc8553b347ebccbe13a09b477804e",
+            "type": "withdrawal"
+          },
+          {
+            "amountEth": "0.003",
+            "amountWei": "3000000000000000",
+            "blockNumber": 11856700,
+            "confirmations": 585,
+            "logIndex": 58,
+            "sharesAfter": "0.003",
+            "timestamp": 1791299964,
+            "transactionHash": "0x0304792edcd32dc589e6e5c7756f86fdc33a283c295b78772a8e323b4d490798",
+            "type": "deposit"
+          }
+        ],
+        "latestBlock": 11857284,
+        "nextCursor": null,
+        "scannedFrom": 11856501,
+        "scannedTo": 11857284
+      }
+    },
+    "/api/transactions/0x0304792edcd32dc589e6e5c7756f86fdc33a283c295b78772a8e323b4d490798": {
+      "url": "https://sc6113-developemnt-coursework.onrender.com/api/transactions/0x0304792edcd32dc589e6e5c7756f86fdc33a283c295b78772a8e323b4d490798",
+      "httpStatus": 200,
+      "queriedAtUtc": "2026-10-06T17:20:40.946987+00:00",
+      "elapsedSeconds": 1.743,
+      "data": {
+        "blockNumber": 11856700,
+        "confirmations": 585,
+        "from": "0xc63A507a39C37CB4C752BA56408138386D06146f",
+        "gasCostWei": "622855710866760",
+        "gasUsed": "245994",
+        "hash": "0x0304792edcd32dc589e6e5c7756f86fdc33a283c295b78772a8e323b4d490798",
+        "status": "success"
+      }
+    },
+    "/api/transactions/0xcb3ebbe7044daf65d6129d01cb936cfaa9ccc8553b347ebccbe13a09b477804e": {
+      "url": "https://sc6113-developemnt-coursework.onrender.com/api/transactions/0xcb3ebbe7044daf65d6129d01cb936cfaa9ccc8553b347ebccbe13a09b477804e",
+      "httpStatus": 200,
+      "queriedAtUtc": "2026-10-06T17:20:41.370080+00:00",
+      "elapsedSeconds": 0.896,
+      "data": {
+        "blockNumber": 11856703,
+        "confirmations": 582,
+        "from": "0xc63A507a39C37CB4C752BA56408138386D06146f",
+        "gasCostWei": "132064592365200",
+        "gasUsed": "53700",
+        "hash": "0xcb3ebbe7044daf65d6129d01cb936cfaa9ccc8553b347ebccbe13a09b477804e",
+        "status": "success"
+      }
+    },
+    "/api/transactions/0xe47ab65933833624b02fddd362fcce5ade0c734d1626790b3239831ff4f06e9a": {
+      "url": "https://sc6113-developemnt-coursework.onrender.com/api/transactions/0xe47ab65933833624b02fddd362fcce5ade0c734d1626790b3239831ff4f06e9a",
+      "httpStatus": 200,
+      "queriedAtUtc": "2026-10-06T17:20:42.088010+00:00",
+      "elapsedSeconds": 1.141,
+      "data": {
+        "blockNumber": 11856705,
+        "confirmations": 580,
+        "from": "0xc63A507a39C37CB4C752BA56408138386D06146f",
+        "gasCostWei": "127495073925600",
+        "gasUsed": "50912",
+        "hash": "0xe47ab65933833624b02fddd362fcce5ade0c734d1626790b3239831ff4f06e9a",
+        "status": "success"
+      }
+    }
+  }
+}
