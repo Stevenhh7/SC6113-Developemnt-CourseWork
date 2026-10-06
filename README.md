@@ -6,9 +6,9 @@ MicroInvest helps investing beginners understand a small investment's full on-ch
 
 ## Implementation and delivery status
 
-The Solidity contract, Flask APIs, English HTML/CSS/JavaScript UI, wallet deployment page, local developer runner, automated tests, documentation and Render configuration are implemented. The local test suite passed on 2026-10-06: 12 contract tests, 17 backend tests, 4 amount/error tests and 13 browser integration checks. See [testing and evaluation](docs/TESTING.md).
+The Solidity contract, Flask APIs, English HTML/CSS/JavaScript UI, wallet deployment page, local developer runner, automated tests, documentation and Render configuration are implemented. The local test suite passed on 2026-10-06: 12 contract tests, 17 backend tests, 4 amount/error tests and 15 browser integration checks. See [testing and evaluation](docs/TESTING.md).
 
-**A live Sepolia deployment and a public Render deployment have not been performed.** They require the student's funded test wallet, RPC configuration and Render/GitHub account. No public address or production URL is invented. Follow the deployment steps below and [the student action checklist](USER_ACTIONS.md). PDF report and screenshots are excluded from this implementation request and remain the student's work.
+**The contract is now deployed on Sepolia.** The student signed the deployment through MetaMask; its successful creation receipt and exact runtime bytecode were independently checked through Sepolia RPC on 2026-10-06. Public metadata is in `deployments/sepolia.json`; see [deployment evidence](docs/DEPLOYMENT.md). The live deposit/redemption flow and public Render deployment still require the student's wallet/account actions. Follow the deployment steps below and [the student action checklist](USER_ACTIONS.md). PDF report and screenshots are excluded from this implementation request and remain the student's work.
 
 ## Technology and repository
 
@@ -80,6 +80,8 @@ pnpm run deploy:local
 Then set `CHAIN_ID=31337`, `LOCAL_DEVELOPMENT=true` and `RPC_URL=http://127.0.0.1:8545` in `.env`, using the address and deployment block printed by deployment; run `.venv/Scripts/python.exe app.py` on Windows or `.venv/bin/python app.py` elsewhere.
 
 ## Deploy the contract to Sepolia with MetaMask
+
+The existing pool is already deployed and configured locally (see `deployments/sepolia.json`). Reuse it for the current demo. The steps below are for rebuilding setup or deliberately creating a new independent pool; do not deploy again simply to continue testing.
 
 1. Enable Sepolia in MetaMask and obtain enough Sepolia test ETH for deployment, deposits and gas. Use a test wallet. Do not give its private key or recovery phrase to this project, Render or another person.
 2. Copy `.env.example` to `.env`. Keep `CHAIN_ID=11155111`, `LOCAL_DEVELOPMENT=false`. Set `RPC_URL` to a Sepolia HTTPS JSON-RPC endpoint supporting `eth_getLogs`. Leave `CONTRACT_ADDRESS`, `DEPLOYMENT_BLOCK` and `DEPLOYER_PRIVATE_KEY` empty initially. The sample public RPC is a convenience fallback, not a guaranteed service.
@@ -159,6 +161,8 @@ On Linux CI use `pnpm exec playwright install --with-deps chromium`. On Windows,
 Amounts stay as `BigInt`/integer wei. Fractional inputs support up to 18 decimals and reject zero, negative, exponent notation and overflow. Only the holder's shares can be redeemed. Failed outgoing transfers revert accounting. A reentrancy guard and checks/effects/interactions protect withdrawals; direct unaccounted sends are rejected. Forced ETH is distinguished from recorded principal and does not create shares or yield.
 
 The frontend treats a hash as **submitted**, and a successful mined receipt as **confirmed**. Reverted, rejected, cancelled and unknown results remain distinct. The latest submitted operation is stored in browser local storage under network/pool/wallet so it can be rechecked after a refresh; confirmed activity is reconstructed from chain events. Rejected requests and failed receipts are not successful business events and are not permanent entries in the confirmed history table.
+
+The overview displays at most the five newest records returned for the recent history range. **View all activity** opens `/activity?wallet=...` for the selected public wallet address. This read-only page starts with 20 records and lets you load older pages until the complete history is displayed; it also supports refresh and wallet account changes. Earlier inactive block ranges can be browsed there without expanding the overview.
 
 One mined confirmation is used for this coursework. It is not an Ethereum finality guarantee. RPC reads can lag or be rate limited. Load older block ranges to retrieve earlier activity; pagination keeps block/log-index cursors so transactions in the same block are not skipped. No commercial audit or real-money suitability is claimed. Wallet addresses, values and activity are public on chain; read-only APIs intentionally require no login.
 

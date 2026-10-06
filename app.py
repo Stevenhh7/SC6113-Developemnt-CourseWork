@@ -74,6 +74,10 @@ def create_app(overrides=None, service=None):
     def index():
         return render_template("index.html")
 
+    @app.get("/activity")
+    def activity_page():
+        return render_template("activity.html")
+
     @app.get("/deploy")
     def deployment_page():
         return render_template("deploy.html")

@@ -9,7 +9,7 @@ On 2026-10-06 the implementation passed these suites on Windows, Node.js 24.19.0
 | Contract | 12 passed | `test/MicroInvest.ts`; `pnpm run test:contract` |
 | Flask/backend | 17 passed, including parametrized cases | `tests/test_backend.py`; `.venv/Scripts/python.exe -m pytest -p no:cacheprovider` |
 | Exact amounts and safe errors | 4 passed | `tests/frontend.test.mjs`; `pnpm run test:frontend` |
-| Browser integration | 13 checks passed | `tests/browser.mjs`; `pnpm run test:browser` |
+| Browser integration | 15 checks passed | `tests/browser.mjs`; `pnpm run test:browser` |
 
 Commands can be rerun from README. Browser/contract runs write `test-results/browser.json` and `test-results/contract-gas.json`, which are ignored local evidence. No screenshot or final PDF is produced. Third-party Web3.py dependencies may emit a deprecation warning; it does not change assertions. Solidity warns about `selfdestruct` in the **test-only forced-ETH helper**, not the business contract.
 
@@ -51,10 +51,12 @@ The automated browser runs the actual rendered application with no screenshots:
 7. Wallet rejection produces declined feedback and leaves chain state unchanged.
 8. Wrong network disables writes; reconnection restores them.
 9. Restarting the Flask process reconstructs confirmed history from chain without a database.
-10. A 390px-wide viewport does not cause document-level horizontal overflow.
-11. The wallet deployment page deploys a real local contract and displays confirmed address/block.
-12. Stopping the RPC node produces an explicit error, unknown position display and disabled deposit.
-13. The browser emits no uncaught script exceptions throughout the flow.
+10. With 21 actual local-chain events, the overview shows exactly the newest five in the correct order.
+11. View all activity preserves the wallet, displays 20 records then all 21 on the next page without missing/duplicate rows, and handles refresh, account changes and a narrow mobile viewport.
+12. A 390px-wide overview viewport does not cause document-level horizontal overflow.
+13. The wallet deployment page deploys a real local contract and displays confirmed address/block.
+14. Stopping the RPC node produces an explicit error, unknown position display and disabled deposit.
+15. The browser emits no uncaught script exceptions throughout the flow.
 
 The simulated provider supports controlled rejection/account/network changes but cannot verify MetaMask extension permissions, popup UI, provider-specific behavior or Sepolia latency. Those checks remain in the live acceptance list below.
 
@@ -79,6 +81,8 @@ The UI explains the fixed ratio, testnet, absence of returns and separate gas co
 Security controls include wallet-side signing, no backend key, caller-bound withdrawals, no deployer privilege, reentrancy lock, rollback on ETH transfer failure, exact integer accounting, non-transferable shares, read-only validated APIs, runtime bytecode/network checks, safe provider errors and a restrictive Content Security Policy. Public chain addresses/activity are not private; no user identity/profile database is stored. One mined confirmation is not chain finality. External RPC failures and wallet extensions remain trust/availability dependencies.
 
 ## Live acceptance still required
+
+The student's Sepolia deployment is now confirmed, with runtime bytecode and live local Flask pool/position/history reads verified. See `docs/DEPLOYMENT.md`. Wallet deposits/redemptions and Render publication remain pending; the local automated suite results above are unchanged.
 
 Use a funded Sepolia MetaMask account and the actual public Render URL. Record real hashes/address/blocks; do not substitute local test evidence for these results.
 

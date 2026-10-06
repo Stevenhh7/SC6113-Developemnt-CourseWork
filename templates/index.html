@@ -65,10 +65,10 @@
       <button id="check-transaction" class="button secondary small" type="button">Check status</button>
     </section>
     <section class="card history-card" aria-labelledby="history-title">
-      <div class="card-heading"><div><p class="eyebrow">ON-CHAIN RECORDS</p><h2 id="history-title">Your activity</h2></div><span class="muted">Confirmed deposits &amp; redemptions</span></div>
+      <div class="card-heading"><div><p class="eyebrow">ON-CHAIN RECORDS</p><h2 id="history-title">Your activity</h2></div><span class="muted">Latest 5 confirmed transactions</span></div>
       <div class="table-scroll"><table><thead><tr><th scope="col">Action</th><th scope="col">Amount</th><th scope="col">Date</th><th scope="col">Status</th><th scope="col">Transaction</th></tr></thead><tbody id="history-body"></tbody></table></div>
       <p id="history-empty" class="empty">Connect your wallet to see your activity.</p>
-      <div class="history-bottom"><span id="history-state" class="muted"></span><button id="load-history" class="button secondary small hidden">Load older activity</button></div>
+      <div class="history-bottom"><span id="history-state" class="muted" role="status" aria-live="polite"></span><a id="view-all-activity" class="button secondary small" href="/activity">View all activity →</a></div>
     </section>
     <section id="how-it-works" class="how-section" aria-labelledby="how-title">
       <div><p class="eyebrow">KNOW WHAT HAPPENS</p><h2 id="how-title">Three steps. Full visibility.</h2></div>

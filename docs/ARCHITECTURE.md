@@ -42,7 +42,7 @@ No platform fee is deducted. Gas is paid separately from the wallet. Native ETH 
 
 ## Public GET APIs
 
-Flask serves `/` and `/deploy`, and these JSON endpoints. All amounts in smallest units are **decimal strings**, never JSON floating-point numbers. Display decimals are also strings. Block numbers and timestamps are ordinary integers. APIs are read-only and do not authenticate public chain data.
+Flask serves `/`, `/activity` and `/deploy`, and these JSON endpoints. All amounts in smallest units are **decimal strings**, never JSON floating-point numbers. Display decimals are also strings. Block numbers and timestamps are ordinary integers. APIs are read-only and do not authenticate public chain data.
 
 | Route | Response / responsibility |
 | --- | --- |
@@ -70,6 +70,8 @@ Controlled errors use `{"error":{"code":"...","message":"..."}}`. Bad address/ha
 Every chain query verifies the configured chain and runtime bytecode. Pool/position amounts are read against an explicit snapshot block. A history page scans at most `HISTORY_PAGE_BLOCKS` and splits `eth_getLogs` into chunks of `LOG_CHUNK_SIZE`. Topics filter the contract's two events and the indexed investor. Only selected records require timestamp lookups.
 
 The cursor is the exclusive `(blockNumber, logIndex)` boundary. If an event limit splits one block, the next page includes that block but excludes previously delivered logs. Once a range is exhausted, `start:0` moves to older logs. An empty range can still have a next cursor: the UI permits continuing to earlier blocks. Large inactive periods therefore need multiple page requests rather than an unbounded RPC call.
+
+The overview requests `limit=5` and caps the displayed recent records at five. Its **View all activity** link carries the selected public wallet address to `/activity?wallet=...`. The independent read-only page requests 20 records per page and appends older cursor pages until all activity is loaded. It works from that public address without signing or wallet installation; connecting/changing an actual wallet selects its account and clears previous records. Both pages use one safe text-only table renderer. Refresh resets complete-history pagination to the newest page.
 
 ## User and transaction lifecycle
 

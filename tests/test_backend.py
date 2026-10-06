@@ -53,6 +53,7 @@ def test_setup_without_config_is_explicit():
     assert not client.get("/api/config").json["configured"]
     assert client.get("/api/pool").status_code == 503
     assert client.get("/").status_code == 200
+    assert client.get("/activity").status_code == 200
     assert client.get("/deploy").status_code == 200
 
 

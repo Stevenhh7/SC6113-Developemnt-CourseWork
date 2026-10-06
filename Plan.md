@@ -15,10 +15,10 @@ Investing beginners; single pool; Sepolia test ETH; fixed fractional 1 ETH = 1 i
 | P2 Contract implementation | Complete; local tests pass | `contracts/MicroInvest.sol`, adversarial tests, artifact/export tooling |
 | P3 Flask backend | Complete; local tests pass | Real state/event/receipt APIs, validation, bounded history, safe errors |
 | P4 Frontend/integration | Complete; local browser checks pass | Wallet connection, deposit, position, partial/full exit, status/history, responsive English UI |
-| P5 Deployment | Tooling complete; live deployments pending student account/wallet actions | Browser/CLI Sepolia deployment, local runner and `render.yaml` |
+| P5 Deployment | Sepolia contract deployed and verified; Render and live deposit/redemption checks pending | `deployments/sepolia.json`, browser/CLI deployment, local runner and `render.yaml` |
 | P6 Handoff | Source/documentation complete; PDF/screenshots excluded | README, test/evaluation notes, CI and `USER_ACTIONS.md` |
 
-No live Sepolia address or Render URL is available yet. The wallet setup page makes the deployment reviewable without exporting a key. Student actions and live acceptance are explicitly pending, not marked as completed deployments.
+The live Sepolia address is `0xE560121978f80c390f6B0d091E9579A2812Cb3DD`, deployment block `11856501`. The student's MetaMask deployment and exact runtime bytecode were independently verified through RPC. No Render URL is available yet. Live wallet deposits/redemptions, Render and final evidence remain pending.
 
 ## Assignment coverage
 
@@ -33,7 +33,7 @@ No live Sepolia address or Render URL is available yet. The wallet setup page ma
 | Error handling | Invalid amounts, wallet rejection, excess exit, mismatched network/code, RPC timeout/failure |
 | Security/evaluation | Meaningful adversarial contract tests, precise amounts, key boundary, gas evidence and stated limits |
 | Source and README | Complete code, lockfile, public build artifacts, setup/deploy/testing instructions |
-| Sepolia and Render | Complete deploy/config workflows; student must supply accounts, funds and settings |
+| Sepolia and Render | Sepolia creation receipt/code and local API reads verified; live wallet flow and Render publication still pending |
 | PDF report and screenshots | Excluded by user; requirements and checklist preserved for student's completion |
 | Database | Not used, as selected; restart recovery reads chain |
 

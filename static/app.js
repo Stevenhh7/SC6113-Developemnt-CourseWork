@@ -1,4 +1,7 @@
 import { parseAmount, formatAmount, shortAddress, walletError } from "./numbers.js";
+import { renderActivityRows } from "./activity-table.js";
+
+const HOME_ACTIVITY_LIMIT = 5;
 
 const $ = (id) => document.getElementById(id);
 const state = { config: null, wallet: null, provider: null, position: null, busy: false,
@@ -95,44 +98,27 @@ async function checkTransaction() {
   }
 }
 function renderHistory() {
-  const body = $("history-body");
-  body.replaceChildren();
-  for (const item of state.items) {
-    const row = document.createElement("tr");
-    const values = [item.type === "deposit" ? "↗ Deposit" : "↙ Redemption", item.amountEth + " ETH",
-      new Date(item.timestamp * 1000).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })];
-    for (const value of values) { const cell = document.createElement("td"); cell.textContent = value; row.append(cell); }
-    row.firstElementChild.className = "action";
-    const statusCell = document.createElement("td");
-    const badge = document.createElement("span"); badge.className = "status-pill"; badge.textContent = "Confirmed"; statusCell.append(badge); row.append(statusCell);
-    const hashCell = document.createElement("td");
-    const link = document.createElement("a"); link.textContent = shortAddress(item.transactionHash);
-    if (state.config.explorerUrl) { link.href = state.config.explorerUrl + "/tx/" + item.transactionHash; link.target = "_blank"; link.rel = "noopener noreferrer"; }
-    else link.title = item.transactionHash;
-    hashCell.append(link); row.append(hashCell); body.append(row);
-  }
+  renderActivityRows($("history-body"), state.items.slice(0, HOME_ACTIVITY_LIMIT), state.config?.explorerUrl);
   $("history-empty").classList.toggle("hidden", state.items.length > 0);
   $("history-empty").textContent = !state.wallet ? "Connect your wallet to see your activity."
-    : state.cursor ? "No activity in this block range. Load an older range to continue." : "No confirmed activity yet.";
-  $("load-history").classList.toggle("hidden", !state.cursor);
+    : state.cursor ? "No recent activity. View all activity to browse older records." : "No confirmed activity yet.";
+  $("view-all-activity").href = state.wallet ? "/activity?wallet=" + encodeURIComponent(state.wallet) : "/activity";
 }
-async function history(reset = false) {
+async function history() {
   if (!state.wallet || !state.config.configured || state.historyBusy) return;
   const wallet = state.wallet, generation = state.generation;
-  const cursor = reset ? null : state.cursor;
-  state.historyBusy = true; $("load-history").disabled = true;
+  state.historyBusy = true;
   $("history-state").textContent = "Reading on-chain activity…";
   try {
-    const query = cursor ? "?cursor=" + encodeURIComponent(cursor) : "";
-    const result = await api("/api/history/" + wallet + query);
+    const result = await api("/api/history/" + wallet + "?limit=" + HOME_ACTIVITY_LIMIT);
     if (generation !== state.generation) return;
     state.cursor = result.nextCursor;
-    state.items = reset ? result.items : [...state.items, ...result.items];
+    state.items = result.items.slice(0, HOME_ACTIVITY_LIMIT);
     renderHistory();
-    $("history-state").textContent = "Blocks " + result.scannedFrom + "–" + result.scannedTo + (state.cursor ? " · Older ranges available" : "");
+    $("history-state").textContent = "Showing " + state.items.length + " recent record" + (state.items.length === 1 ? "" : "s") + (state.cursor ? " · More available" : "");
   } catch (error) {
     if (generation === state.generation) { $("history-state").textContent = error.message; $("history-empty").textContent = "Activity query unavailable. Press refresh to retry."; }
-  } finally { if (generation === state.generation) { state.historyBusy = false; $("load-history").disabled = false; } }
+  } finally { if (generation === state.generation) state.historyBusy = false; }
 }
 async function refresh() {
   if (!state.config?.configured) return;
@@ -148,7 +134,7 @@ async function refresh() {
       const position = await api("/api/position/" + wallet);
       if (generation !== state.generation) return;
       showPosition(position);
-      await history(true);
+      await history();
     }
   } catch (error) {
     if (generation === state.generation) { $("pool-principal").textContent = "—"; clearPosition(); notice(error.message); }
@@ -265,7 +251,6 @@ async function boot() {
   $("deposit-panel").addEventListener("submit", (e) => { e.preventDefault(); void submit("deposit"); });
   $("withdraw-panel").addEventListener("submit", (e) => { e.preventDefault(); void submit("withdraw"); });
   $("withdraw-all-button").addEventListener("click", () => void submit("all"));
-  $("load-history").addEventListener("click", () => void history());
   $("check-transaction").addEventListener("click", () => void checkTransaction());
   $("deposit-amount").addEventListener("input", () => {
     try { $("deposit-preview").textContent = formatAmount(parseAmount($("deposit-amount").value)); }

@@ -1,0 +1,10 @@
+{
+  "name": "sepolia",
+  "chainId": 11155111,
+  "address": "0xE560121978f80c390f6B0d091E9579A2812Cb3DD",
+  "deploymentBlock": 11856501,
+  "transactionHash": "0x45dba804763f4d53c4da30957b3d4da0f02dd15eecb65762a904926f99efd2ea",
+  "deployer": "0xc63A507a39C37CB4C752BA56408138386D06146f",
+  "compiler": "0.8.30",
+  "gasUsed": "1814581"
+}
