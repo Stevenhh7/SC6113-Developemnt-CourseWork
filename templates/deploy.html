@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contract setup · MicroInvest</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <script src="/static/vendor/ethers.umd.min.js" defer></script>
+  <script src="/static/deploy.js" type="module"></script>
+</head>
+<body><main class="shell setup-page">
+  <a class="brand" href="/">← MicroInvest</a>
+  <h1>Deploy your testnet pool</h1>
+  <p>This setup page deploys the compiled MicroInvest contract through MetaMask. Your wallet signs the deployment; no private key is exported or sent to Flask.</p>
+  <article class="card">
+    <p id="deploy-network">Loading network configuration…</p>
+    <p>Use a wallet funded with test ETH. Deployment spends network gas. Each deployment creates a new, independent pool.</p>
+    <div class="setup-actions"><button id="deploy-connect" class="button" disabled>Connect MetaMask</button><button id="deploy-contract" class="button secondary" disabled>Deploy contract</button></div>
+    <p id="deploy-status" role="status" aria-live="polite"></p>
+    <a id="deploy-tx" target="_blank" rel="noopener noreferrer" class="hash-link"></a>
+  </article>
+  <article id="deploy-result" class="card hidden">
+    <h2>Deployment confirmed</h2>
+    <p>Copy these values into your local .env file or the Render service's environment settings, then restart the service.</p>
+    <pre id="deploy-env"></pre>
+    <div class="setup-actions"><button id="copy-deployment" class="button small">Copy settings</button><button id="download-deployment" class="button secondary small">Download deployment JSON</button></div>
+    <p>The pool has no administrator. The deploying wallet receives no management or withdrawal privileges.</p>
+  </article>
+</main></body></html>

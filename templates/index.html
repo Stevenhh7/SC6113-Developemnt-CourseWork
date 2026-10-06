@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="MicroInvest is a simple educational testnet pool for learning small deposits, shares and redemptions.">
+  <title>MicroInvest · Start small. Understand every step.</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <script src="/static/vendor/ethers.umd.min.js" defer></script>
+  <script src="/static/app.js" type="module"></script>
+</head>
+<body>
+  <header class="header shell">
+    <a class="brand" href="/" aria-label="MicroInvest home"><span class="brand-mark" aria-hidden="true">m<span>i</span></span>MicroInvest</a>
+    <nav aria-label="Main navigation"><a href="#how-it-works">How it works</a><span id="network-badge" class="network"><span class="dot"></span>Sepolia</span><button id="connect-button" class="button small">Connect wallet</button></nav>
+  </header>
+  <main class="shell">
+    <section class="hero">
+      <div><p class="eyebrow">SMALL STEPS. CLEAR OWNERSHIP.</p><h1>Your first step<br>into <span>on-chain investing.</span></h1><p class="hero-copy">Start with a small test deposit. See your shares, follow every transaction, and redeem whenever you choose.</p></div>
+      <aside class="hero-note"><span class="pill">EDUCATIONAL TESTNET</span><p>Learn with test ETH.</p><span>This pool demonstrates deposits and redemptions. It does not generate investment returns.</span></aside>
+    </section>
+    <div id="setup-message" class="notice hidden" role="status">The pool is not configured yet. <a href="/deploy">Deploy a contract with MetaMask</a>, then configure the server using the generated deployment details.</div>
+    <div id="page-message" class="notice hidden" role="alert"></div>
+    <section class="stats" aria-label="Pool summary">
+      <article class="stat"><p>Total pool principal</p><h2><span id="pool-principal">—</span><small>test ETH</small></h2><span>Backed by the contract</span></article>
+      <article class="stat"><p>Share conversion</p><h2>1 : 1<small>ETH to shares</small></h2><span>Fixed ratio · fractional shares</span></article>
+      <article class="stat"><p>Platform fee</p><h2>0%<small>always</small></h2><span>Network gas still applies</span></article>
+    </section>
+    <section class="workspace" aria-label="Your investment">
+      <article class="card action-card">
+        <div class="card-heading"><div><p class="eyebrow">MAKE YOUR MOVE</p><h2>Invest at your pace</h2></div><span class="muted">No lock-up</span></div>
+        <div class="tabs" role="tablist" aria-label="Investment action">
+          <button id="deposit-tab" role="tab" aria-selected="true" aria-controls="deposit-panel" class="tab active">Deposit</button>
+          <button id="withdraw-tab" role="tab" aria-selected="false" aria-controls="withdraw-panel" class="tab">Redeem</button>
+        </div>
+        <form id="deposit-panel" role="tabpanel" aria-labelledby="deposit-tab" novalidate>
+          <div class="label-row"><label for="deposit-amount">Amount to deposit</label><span>Wallet: <span id="wallet-balance">—</span> ETH</span></div>
+          <div class="amount-input"><input id="deposit-amount" type="text" inputmode="decimal" placeholder="0.00" autocomplete="off" aria-describedby="deposit-help"><span>ETH</span></div>
+          <p id="deposit-help" class="field-help">Any valid amount above zero. Keep some test ETH for gas.</p>
+          <div class="estimate"><span>You receive</span><strong><span id="deposit-preview">0</span> shares</strong></div>
+          <button id="deposit-button" class="button wide" type="submit" disabled>Deposit test ETH <span aria-hidden="true">↗</span></button>
+        </form>
+        <form id="withdraw-panel" class="hidden" role="tabpanel" aria-labelledby="withdraw-tab" novalidate>
+          <div class="label-row"><label for="withdraw-amount">Amount to redeem</label><span>Available: <span id="available-amount">—</span> ETH</span></div>
+          <div class="amount-input"><input id="withdraw-amount" type="text" inputmode="decimal" placeholder="0.00" autocomplete="off"><span>ETH</span></div>
+          <p class="field-help">Redeem part of your position or exit in full. Gas is paid separately.</p>
+          <button id="withdraw-button" class="button wide" type="submit" disabled>Redeem amount <span aria-hidden="true">↗</span></button>
+          <button id="withdraw-all-button" class="button secondary wide" type="button" disabled>Redeem all shares</button>
+        </form>
+        <p id="form-message" class="form-message" aria-live="polite"></p>
+        <p class="signing-note"><span aria-hidden="true">◇</span> Every transaction is approved in your wallet.</p>
+      </article>
+      <article class="card position-card">
+        <div class="card-heading"><div><p class="eyebrow">YOUR POSITION</p><h2>A clear view of your shares</h2></div><button id="refresh-button" class="icon-button" type="button" aria-label="Refresh pool and position">↻</button></div>
+        <p id="account-label" class="account-label">Connect your wallet to view your position.</p>
+        <div class="position-main"><span id="owned-shares">—</span><small>shares you own</small></div>
+        <div class="position-row"><span>Redeemable principal</span><strong><span id="redeemable">—</span> ETH</strong></div>
+        <div class="position-row"><span>Share transfer</span><strong>Non-transferable</strong></div>
+        <div class="position-row"><span>Redemption</span><strong>Anytime</strong></div>
+        <div class="position-footer"><span class="dot"></span><span id="data-state">Connect to get started</span></div>
+      </article>
+    </section>
+    <section id="transaction-box" class="card transaction-card hidden" aria-live="polite">
+      <div><p class="eyebrow">CURRENT TRANSACTION</p><h3 id="transaction-status">Waiting</h3><p id="transaction-detail" class="muted"></p><a id="transaction-link" class="hash-link" target="_blank" rel="noopener noreferrer"></a></div>
+      <button id="check-transaction" class="button secondary small" type="button">Check status</button>
+    </section>
+    <section class="card history-card" aria-labelledby="history-title">
+      <div class="card-heading"><div><p class="eyebrow">ON-CHAIN RECORDS</p><h2 id="history-title">Your activity</h2></div><span class="muted">Confirmed deposits &amp; redemptions</span></div>
+      <div class="table-scroll"><table><thead><tr><th scope="col">Action</th><th scope="col">Amount</th><th scope="col">Date</th><th scope="col">Status</th><th scope="col">Transaction</th></tr></thead><tbody id="history-body"></tbody></table></div>
+      <p id="history-empty" class="empty">Connect your wallet to see your activity.</p>
+      <div class="history-bottom"><span id="history-state" class="muted"></span><button id="load-history" class="button secondary small hidden">Load older activity</button></div>
+    </section>
+    <section id="how-it-works" class="how-section" aria-labelledby="how-title">
+      <div><p class="eyebrow">KNOW WHAT HAPPENS</p><h2 id="how-title">Three steps. Full visibility.</h2></div>
+      <div class="steps"><article><span>01</span><h3>Connect</h3><p>Connect MetaMask on Sepolia. Your wallet keeps control of your keys.</p></article><article><span>02</span><h3>Deposit</h3><p>Deposit test ETH into one pool. Every ETH corresponds to one share.</p></article><article><span>03</span><h3>Redeem</h3><p>Redeem any portion of your shares at the same ratio, whenever you choose.</p></article></div>
+    </section>
+    <footer><span>MicroInvest · Learn with clarity.</span><span>Sepolia testnet only · No yield · No platform fees</span></footer>
+  </main>
+</body>
+</html>

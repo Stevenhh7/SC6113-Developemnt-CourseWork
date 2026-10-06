@@ -1,0 +1,30 @@
+{
+  "name": "microinvest",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "MicroInvest: Flask and vanilla JavaScript financial DApp. Node is for contract tooling only.",
+  "engines": { "node": ">=22.13.0" },
+  "scripts": {
+    "compile": "hardhat compile && node scripts/export-artifact.mjs",
+    "test:contract": "hardhat test nodejs",
+    "test:frontend": "node --test tests/frontend.test.mjs",
+    "test:browser": "node tests/browser.mjs",
+    "test": "hardhat test nodejs && node --test tests/frontend.test.mjs",
+    "dev:local": "node scripts/local-demo.mjs",
+    "node": "hardhat node --hostname 127.0.0.1",
+    "deploy:local": "hardhat run scripts/deploy.ts --network localhost",
+    "deploy:sepolia": "hardhat run scripts/deploy.ts --network sepolia",
+    "vendor": "node scripts/vendor.mjs"
+  },
+  "packageManager": "pnpm@11.19.0",
+  "dependencies": { "ethers": "6.17.0" },
+  "devDependencies": {
+    "hardhat": "3.18.1",
+    "@nomicfoundation/hardhat-ethers": "4.2.0",
+    "@nomicfoundation/hardhat-node-test-runner": "3.1.0",
+    "solc": "0.8.30",
+    "dotenv": "17.2.3",
+    "playwright": "1.51.1"
+  }
+}

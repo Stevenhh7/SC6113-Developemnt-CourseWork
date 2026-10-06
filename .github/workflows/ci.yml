@@ -1,0 +1,32 @@
+name: MicroInvest checks
+on: [push, pull_request, workflow_dispatch]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.19.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          pnpm install --frozen-lockfile
+          python -m venv .venv
+          .venv/bin/python -m pip install -r requirements-dev.txt
+      - name: Compile and test contract and amount logic
+        run: |
+          pnpm run compile
+          pnpm test
+      - name: Test Flask
+        run: .venv/bin/python -m pytest -p no:cacheprovider
+      - name: Test browser integration on a local chain
+        run: |
+          pnpm exec playwright install --with-deps chromium
+          pnpm run test:browser

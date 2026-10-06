@@ -1,0 +1,17 @@
+.env
+.env.*
+!.env.example
+.venv/
+node_modules/
+.pnpm-store/
+artifacts/
+cache/
+coverage/
+__pycache__/
+.pytest_cache/
+*.py[cod]
+deployments/localhost.json
+test-results/
+.DS_Store
+pytest-cache-files-*/
+
