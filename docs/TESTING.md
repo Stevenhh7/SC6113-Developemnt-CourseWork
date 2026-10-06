@@ -4,12 +4,14 @@
 
 On 2026-10-06 the implementation passed these suites on Windows, Node.js 24.19.0, Python 3.12, Solidity 0.8.30 and Hardhat 3.18.1. Browser integration used installed Microsoft Edge, real Flask/Web3.py queries and a real local Hardhat chain. Its EIP-1193 wallet is a simulation, not a real MetaMask extension. No Sepolia transaction or Render deployment is represented by these local results.
 
+On 2026-10-07 the account-menu update passed 19 browser integration checks, all 17 backend tests and all 4 amount/error tests. The unchanged contract's 12-test result remains from 2026-10-06.
+
 | Suite | Result | Evidence / command |
 | --- | --- | --- |
 | Contract | 12 passed | `test/MicroInvest.ts`; `pnpm run test:contract` |
 | Flask/backend | 17 passed, including parametrized cases | `tests/test_backend.py`; `.venv/Scripts/python.exe -m pytest -p no:cacheprovider` |
 | Exact amounts and safe errors | 4 passed | `tests/frontend.test.mjs`; `pnpm run test:frontend` |
-| Browser integration | 15 checks passed | `tests/browser.mjs`; `pnpm run test:browser` |
+| Browser integration | 19 checks passed (2026-10-07) | `tests/browser.mjs`; `pnpm run test:browser` |
 
 Commands can be rerun from README. Browser/contract runs write `test-results/browser.json` and `test-results/contract-gas.json`, which are ignored local evidence. No screenshot or final PDF is produced. Third-party Web3.py dependencies may emit a deprecation warning; it does not change assertions. Solidity warns about `selfdestruct` in the **test-only forced-ETH helper**, not the business contract.
 
@@ -57,6 +59,10 @@ The automated browser runs the actual rendered application with no screenshots:
 13. The wallet deployment page deploys a real local contract and displays confirmed address/block.
 14. Stopping the RPC node produces an explicit error, unknown position display and disabled deposit.
 15. The browser emits no uncaught script exceptions throughout the flow.
+16. The wallet menu shows only exposed accounts, supports keyboard opening/Escape, switches its selected account, and preserves selection when permission approval is rejected.
+17. Selecting an account from the full-activity menu replaces the records and updates the wallet in the URL.
+18. The second authorized account deposits and redeems 17 wei while the first address remains first in `eth_accounts`; actual contract balances prove the selected signer is used. The mobile menu stays within a 390px viewport.
+19. Reload restores an authorized account choice; when that address is no longer exposed, connection falls back to an exposed account rather than trusting browser storage.
 
 The simulated provider supports controlled rejection/account/network changes but cannot verify MetaMask extension permissions, popup UI, provider-specific behavior or Sepolia latency. Those checks remain in the live acceptance list below.
 
@@ -94,7 +100,7 @@ Use a funded Sepolia MetaMask account and the actual public Render URL. Record r
 | Deposit a small amount | Confirmed successful receipt, exact shares and event |
 | Partial / full exit | Matching principal debit and exact remainder/zero; gas shown by wallet |
 | Invalid input / excess exit | Clear rejection, no unintended chain change |
-| Second wallet / network switch | Isolated position and disabled wrong-network writes |
+| Second wallet / network switch | Manage accounts in MetaMask authorizes an additional account; menu switching isolates position/history and signs from the selected address; wrong-network writes are disabled |
 | Refresh / Render restart | Same confirmed chain-backed position/history |
 | RPC outage / delayed confirmation | Error/unknown result remains retryable; no false success |
 

@@ -1,8 +1,18 @@
-import { shortAddress, walletError } from "./numbers.js";
+import { walletError } from "./numbers.js";
 import { renderActivityRows } from "./activity-table.js";
+import { createWalletMenu, connectedAccounts, authorizeAccounts, preferredAccount, rememberAccount } from "./wallet-menu.js";
 
 const $ = id => document.getElementById(id);
-const state = { config: null, wallet: null, items: [], cursor: null, busy: false, failed: false, generation: 0 };
+const state = { config: null, wallet: null, connectedWallet: null, items: [], cursor: null, busy: false, failed: false, generation: 0 };
+const walletMenu = createWalletMenu({ onConnect: connect, onSelect: chooseAccount,
+  onManage: async () => { const selected = state.connectedWallet; await chooseAccount(await authorizeAccounts(), selected); }, onError: notice });
+async function chooseAccount(value, selected = null) {
+  const accounts = connectedAccounts(value);
+  state.connectedWallet = accounts.find(account => account.toLowerCase() === selected?.toLowerCase()) || accounts[0] || null;
+  walletMenu.setAccounts(accounts, state.connectedWallet);
+  rememberAccount(state.connectedWallet, state.config);
+  await selectWallet(state.connectedWallet);
+}
 function notice(message = "") {
   $("page-message").textContent = message;
   $("page-message").classList.toggle("hidden", !message);
@@ -69,28 +79,23 @@ async function selectWallet(wallet) {
 async function connect() {
   if (!window.ethereum) { notice("MetaMask was not found. Install or enable MetaMask, then reload this page."); return; }
   try {
-    const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-    $("connect-button").textContent = accounts[0] ? shortAddress(accounts[0]) : "Connect wallet";
-    await selectWallet(accounts[0]);
+    const accounts = connectedAccounts(await window.ethereum.request({ method: "eth_requestAccounts" }));
+    await chooseAccount(accounts, preferredAccount(accounts, state.config));
   } catch (error) { notice(walletError(error)); }
 }
-$("connect-button").addEventListener("click", connect);
 $("refresh-activity").addEventListener("click", () => void loadHistory(true));
 $("load-history").addEventListener("click", () => void loadHistory());
 try {
   state.config = await api("/api/config");
   $("network-badge").lastChild.textContent = state.config.chainName;
-  $("connect-button").disabled = false;
+  walletMenu.setBusy(false);
   if (!state.config.configured) notice("The pool is not configured yet. Return to the overview to complete setup.");
-  window.ethereum?.on?.("accountsChanged", accounts => {
-    $("connect-button").textContent = accounts[0] ? shortAddress(accounts[0]) : "Connect wallet";
-    void selectWallet(accounts[0]);
-  });
-  window.ethereum?.on?.("disconnect", () => { $("connect-button").textContent = "Connect wallet"; void selectWallet(null); });
+  window.ethereum?.on?.("accountsChanged", accounts => void chooseAccount(accounts).catch(error => notice(walletError(error))));
+  window.ethereum?.on?.("disconnect", () => void chooseAccount([]));
   const requestedWallet = new URLSearchParams(window.location.search).get("wallet");
+  const accounts = window.ethereum ? connectedAccounts(await window.ethereum.request({ method: "eth_accounts" })) : [];
+  state.connectedWallet = preferredAccount(accounts, state.config);
+  walletMenu.setAccounts(accounts, state.connectedWallet);
   if (requestedWallet) await selectWallet(requestedWallet);
-  else if (window.ethereum) {
-    const accounts = await window.ethereum.request({ method: "eth_accounts" });
-    if (accounts[0]) { $("connect-button").textContent = shortAddress(accounts[0]); await selectWallet(accounts[0]); }
-  }
+  else if (state.connectedWallet) await chooseAccount(accounts, state.connectedWallet);
 } catch (error) { notice(error.message); }

@@ -1,12 +1,19 @@
-import { parseAmount, formatAmount, shortAddress, walletError } from "./numbers.js";
+import { parseAmount, formatAmount, walletError } from "./numbers.js";
 import { renderActivityRows } from "./activity-table.js";
+import { createWalletMenu, connectedAccounts, authorizeAccounts, preferredAccount, rememberAccount } from "./wallet-menu.js";
 
 const HOME_ACTIVITY_LIMIT = 5;
 
 const $ = (id) => document.getElementById(id);
 const state = { config: null, wallet: null, provider: null, position: null, busy: false,
-  cursor: null, items: [], tx: null, generation: 0, historyBusy: false };
+  accounts: [], walletBusy: false, cursor: null, items: [], tx: null, generation: 0, historyBusy: false };
 const storageKey = () => state.wallet && state.config ? ["microinvest", state.config.chainId, state.config.contractAddress, state.wallet.toLowerCase()].join(":") : null;
+const walletMenu = createWalletMenu({ onConnect: connect, onSelect: selectAccount,
+  onManage: async () => {
+    const selected = state.wallet;
+    await ensureNetwork();
+    await selectAccount(await authorizeAccounts(), selected);
+  }, onError: notice, onBusy: busy => { state.walletBusy = busy; actions(); } });
 
 async function api(path) {
   const controller = new AbortController();
@@ -27,13 +34,13 @@ function notice(message = "") {
   $("page-message").classList.toggle("error", Boolean(message));
 }
 function actions() {
-  const enabled = Boolean(state.config?.configured && state.wallet && state.provider && state.position && !state.busy);
+  const enabled = Boolean(state.config?.configured && state.wallet && state.provider && state.position && !state.busy && !state.walletBusy);
   $("deposit-button").disabled = !enabled;
   $("withdraw-button").disabled = !enabled || BigInt(state.position?.sharesUnits || "0") === 0n;
   $("withdraw-all-button").disabled = $("withdraw-button").disabled;
   $("deposit-amount").disabled = state.busy;
   $("withdraw-amount").disabled = state.busy;
-  $("connect-button").disabled = state.busy;
+  walletMenu.setBusy(state.busy || !state.config);
 }
 function clearPosition() {
   state.position = null;
@@ -154,29 +161,34 @@ async function ensureNetwork() {
     } else throw error;
   }
 }
-async function selectAccount(accounts) {
-  state.generation++; state.wallet = accounts[0] || null; state.provider = null;
+async function selectAccount(accounts, selected = null) {
+  state.accounts = connectedAccounts(accounts);
+  state.generation++; state.wallet = state.accounts.find(account => account.toLowerCase() === selected?.toLowerCase()) || state.accounts[0] || null;
+  const generation = state.generation;
+  state.provider = null;
   state.items = []; state.cursor = null; state.tx = null; state.historyBusy = false;
   $("transaction-box").classList.add("hidden"); $("form-message").textContent = "";
   clearPosition(); renderHistory();
-  $("connect-button").textContent = state.wallet ? shortAddress(state.wallet) : "Connect wallet";
+  walletMenu.setAccounts(state.accounts, state.wallet);
+  rememberAccount(state.wallet, state.config);
   $("account-label").textContent = state.wallet || "Connect your wallet to view your position.";
-  if (!state.wallet) return;
+  if (!state.wallet) { notice(); return; }
   const chain = Number.parseInt(await window.ethereum.request({ method: "eth_chainId" }), 16);
-  if (chain !== state.config.chainId) { notice("Switch your wallet to " + state.config.chainName + " using the connect button."); return; }
+  if (generation !== state.generation) return;
+  if (chain !== state.config.chainId) { notice("Open the wallet menu and choose Reconnect wallet to switch to " + state.config.chainName + "."); return; }
   state.provider = new window.ethers.BrowserProvider(window.ethereum, "any");
-  await refresh(); loadSaved();
+  await refresh(); if (generation === state.generation) loadSaved();
 }
 async function connect() {
   if (!window.ethereum) { notice("MetaMask was not found. Install or enable MetaMask, then reload this page."); return; }
   try {
     await ensureNetwork();
-    const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-    await selectAccount(accounts);
+    const accounts = connectedAccounts(await window.ethereum.request({ method: "eth_requestAccounts" }));
+    await selectAccount(accounts, preferredAccount(accounts, state.config));
   } catch (error) { notice(walletError(error)); }
 }
 async function submit(kind) {
-  if (state.busy || !state.position || !state.wallet) return;
+  if (state.busy || state.walletBusy || !state.position || !state.wallet) return;
   $("form-message").textContent = "";
   const generation = state.generation, wallet = state.wallet;
   let value;
@@ -190,7 +202,7 @@ async function submit(kind) {
   try {
     const chain = Number.parseInt(await window.ethereum.request({ method: "eth_chainId" }), 16);
     const accounts = await window.ethereum.request({ method: "eth_accounts" });
-    if (chain !== state.config.chainId || accounts[0]?.toLowerCase() !== wallet.toLowerCase()) throw new Error("Wallet changed");
+    if (chain !== state.config.chainId || !connectedAccounts(accounts).some(account => account.toLowerCase() === wallet.toLowerCase())) throw new Error("Wallet changed");
     const signer = await state.provider.getSigner(wallet);
     const contract = new window.ethers.Contract(state.config.contractAddress, state.config.abi, signer);
     if (kind === "deposit") {
@@ -243,8 +255,6 @@ function tab(selected) {
   }
 }
 async function boot() {
-  $("connect-button").disabled = true;
-  $("connect-button").addEventListener("click", connect);
   $("refresh-button").addEventListener("click", () => void refresh());
   $("deposit-tab").addEventListener("click", () => tab("deposit"));
   $("withdraw-tab").addEventListener("click", () => tab("withdraw"));
@@ -258,7 +268,7 @@ async function boot() {
   });
   try {
     state.config = await api("/api/config");
-    $("connect-button").disabled = false;
+    walletMenu.setBusy(false);
     $("network-badge").lastChild.textContent = state.config.chainName;
     $("setup-message").classList.toggle("hidden", state.config.configured);
     await refresh();
@@ -267,11 +277,11 @@ async function boot() {
       window.ethereum.on?.("chainChanged", () => {
         state.generation++; state.provider = null; clearPosition();
         state.items = []; state.cursor = null; state.historyBusy = false; renderHistory();
-        notice("Wallet network changed. Press the connect button to reconnect.");
+        notice("Wallet network changed. Open the wallet menu and choose Reconnect wallet.");
       });
       window.ethereum.on?.("disconnect", () => void selectAccount([]));
-      const accounts = await window.ethereum.request({ method: "eth_accounts" });
-      if (accounts.length) await selectAccount(accounts);
+      const accounts = connectedAccounts(await window.ethereum.request({ method: "eth_accounts" }));
+      if (accounts.length) await selectAccount(accounts, preferredAccount(accounts, state.config));
     }
   } catch (error) { notice(error.message); }
 }

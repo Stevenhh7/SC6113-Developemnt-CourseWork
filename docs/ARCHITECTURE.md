@@ -14,7 +14,7 @@ flowchart LR
     R[Render + Gunicorn] --- F
 ```
 
-The backend holds no signing key and provides no transaction submission endpoint. MetaMask and the user's network provider handle writes; Flask uses its separately configured RPC for reads. Both must use the same chain/address. The chain remains authoritative after backend restart. Browser local storage only tracks the latest transaction for that wallet/pool/network; it is never a source of account balances.
+The backend holds no signing key and provides no transaction submission endpoint. MetaMask and the user's network provider handle writes; Flask uses its separately configured RPC for reads. Both must use the same chain/address. The chain remains authoritative after backend restart. Browser local storage tracks the latest transaction for that wallet/pool/network and a preferred account for that pool/network; it is never a source of account balances or wallet permissions.
 
 ## Contract state and transitions
 
@@ -76,8 +76,8 @@ The overview requests `limit=5` and caps the displayed recent records at five. I
 ## User and transaction lifecycle
 
 1. Read public configuration/pool; explain fixed shares, testnet, no yield and gas.
-2. Connect MetaMask and select the configured network. Read address-specific position/history through Flask.
-3. Validate positive decimal input and current redeemable balance. Recheck active account/network immediately before signing. A deposit also estimates gas and checks wallet balance.
+2. Connect MetaMask and select the configured network. The shared header menu lists valid addresses returned by `eth_accounts`. Selecting an address clears previous position/history and loads the selected account through Flask. The saved account preference is used only if still in that returned list. A user click on Manage accounts invokes `wallet_requestPermissions` for `eth_accounts`; simply opening the menu requests no permissions.
+3. Validate positive decimal input and current redeemable balance. Recheck network and the selected address's membership in `eth_accounts` immediately before signing; the selected address need not be the first list entry. Use `getSigner(selectedAddress)` for the transaction. Account menu operations and transaction submissions temporarily disable conflicting actions. A deposit also estimates gas and checks wallet balance.
 4. Request wallet approval. A rejected request is not a transaction. Once a hash exists, mark the operation pending and store the hash under its network/pool/wallet.
 5. Wait for a mined receipt. Status 1 produces confirmed feedback and fresh state reads; status 0 reports revert. A replacement/cancellation is tracked separately. Timeout or connection failure preserves the hash as unknown and permits rechecking.
 6. On account/network change, clear position/history and disable writes until the new context is loaded. Earlier asynchronous responses cannot overwrite a newer context.

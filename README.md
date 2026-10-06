@@ -6,7 +6,7 @@ MicroInvest helps investing beginners understand a small investment's full on-ch
 
 ## Implementation and delivery status
 
-The Solidity contract, Flask APIs, English HTML/CSS/JavaScript UI, wallet deployment page, local developer runner, automated tests, documentation and Render configuration are implemented. The local test suite passed on 2026-10-06: 12 contract tests, 17 backend tests, 4 amount/error tests and 15 browser integration checks. See [testing and evaluation](docs/TESTING.md).
+The Solidity contract, Flask APIs, English HTML/CSS/JavaScript UI, wallet deployment page, local developer runner, automated tests, documentation and Render configuration are implemented. The baseline suites passed on 2026-10-06: 12 contract tests, 17 backend tests, 4 amount/error tests and 15 browser integration checks. The account-menu update was checked on 2026-10-07 with 19 browser checks, 17 backend tests and 4 amount/error tests passing. See [testing and evaluation](docs/TESTING.md).
 
 **The contract is now deployed on Sepolia.** The student signed the deployment through MetaMask; its successful creation receipt and exact runtime bytecode were independently checked through Sepolia RPC on 2026-10-06. Public metadata is in `deployments/sepolia.json`; see [deployment evidence](docs/DEPLOYMENT.md). The live deposit/redemption flow and public Render deployment still require the student's wallet/account actions. Follow the deployment steps below and [the student action checklist](USER_ACTIONS.md). PDF report and screenshots are excluded from this implementation request and remain the student's work.
 
@@ -78,6 +78,10 @@ pnpm run deploy:local
 ```
 
 Then set `CHAIN_ID=31337`, `LOCAL_DEVELOPMENT=true` and `RPC_URL=http://127.0.0.1:8545` in `.env`, using the address and deployment block printed by deployment; run `.venv/Scripts/python.exe app.py` on Windows or `.venv/bin/python app.py` elsewhere.
+
+## Choose a participating account
+
+After connecting, click the wallet address in the header to open its account menu. Select a connected account to load that account's position and activity; deposits and redemptions request a signature from that selected account. Use **Manage accounts in MetaMask** to authorize other accounts. The list contains only addresses exposed by the wallet to this site, and an account choice cannot grant wallet permissions by itself. **Reconnect wallet** also restores the required network after a network change. The same menu is available on the full activity page. A saved selection is restored only if the wallet still exposes that account.
 
 ## Deploy the contract to Sepolia with MetaMask
 

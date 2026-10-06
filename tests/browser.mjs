@@ -68,15 +68,21 @@ try {
     try { return {result:await provider.send(payload.method, payload.params||[])}; }
     catch (error) { return {error:{code:error.code,message:error.shortMessage||error.message}}; }
   });
-  await page.addInitScript(({wallet}) => {
+  await page.addInitScript(({wallet, otherWallet}) => {
     const handlers = {};
-    let accounts=[wallet], connected=false, chain="0x7a69";
+    let accounts=sessionStorage.getItem("test-permitted-accounts")==="all"?[wallet,otherWallet]:[wallet], connected=false, chain="0x7a69";
     window.ethereum = {
       isMetaMask:true,
       on(name,handler){ (handlers[name] ||= []).push(handler); },
       async request(payload) {
         if(payload.method==="eth_accounts") return connected?accounts:[];
         if(payload.method==="eth_requestAccounts"){connected=true;return accounts;}
+        if(payload.method==="wallet_requestPermissions"){
+          if(window.rejectNextPermissions){window.rejectNextPermissions=false;const e=new Error("User declined");e.code=4001;throw e;}
+          accounts=[wallet,otherWallet];connected=true;sessionStorage.setItem("test-permitted-accounts","all");
+          for(const h of handlers.accountsChanged||[])h(accounts);
+          return [{parentCapability:"eth_accounts"}];
+        }
         if(payload.method==="eth_chainId") return chain;
         if(payload.method==="wallet_switchEthereumChain"){chain=payload.params[0].chainId;return null;}
         if(payload.method==="eth_sendTransaction" && window.rejectNextWalletRequest){window.rejectNextWalletRequest=false;const e=new Error("User declined");e.code=4001;throw e;}
@@ -87,11 +93,33 @@ try {
     };
     window.changeWallet=(wallet)=>{accounts=wallet?[wallet]:[];connected=Boolean(wallet);for(const h of handlers.accountsChanged||[])h(accounts);};
     window.changeNetwork=(value)=>{chain=value;for(const h of handlers.chainChanged||[])h(value);};
-  }, {wallet:await signer.getAddress()});
+  }, {wallet:await signer.getAddress(),otherWallet:await other.getAddress()});
   await page.goto(origin);
   await page.locator("#connect-button").click();
   await waitUntil(async()=>await page.locator("#owned-shares").textContent()==="0");
   mark("Wallet connection and initial position");
+  await page.locator("#connect-button").click();
+  await page.locator("#wallet-menu").waitFor({state:"visible"});
+  assert.equal(await page.locator(".wallet-account").count(),1);
+  await page.keyboard.press("Escape");
+  assert.equal(await page.locator("#wallet-menu").isVisible(),false);
+  await page.locator("#connect-button").press("ArrowDown");
+  await page.locator("#authorize-accounts").click();
+  await waitUntil(()=>page.locator("#connect-button").isEnabled());
+  await page.locator("#connect-button").click();
+  assert.equal(await page.locator(".wallet-account").count(),2);
+  await page.locator('.wallet-account[data-account="'+await other.getAddress()+'"]').click();
+  await waitUntil(async()=>(await page.locator("#account-label").textContent()).toLowerCase()===(await other.getAddress()).toLowerCase() && await page.locator("#owned-shares").textContent()==="0");
+  await page.locator("#connect-button").click();
+  assert.equal(await page.locator('[aria-checked="true"]').getAttribute("data-account"),await other.getAddress());
+  await page.locator('.wallet-account[data-account="'+await signer.getAddress()+'"]').click();
+  await waitUntil(()=>page.locator("#deposit-button").isEnabled());
+  await page.locator("#connect-button").click();
+  await page.evaluate(()=>window.rejectNextPermissions=true);
+  await page.locator("#authorize-accounts").click();
+  await waitUntil(async()=>(await page.locator("#page-message").textContent()).includes("declined"));
+  assert.equal((await page.locator("#account-label").textContent()).toLowerCase(),(await signer.getAddress()).toLowerCase());
+  mark("Wallet menu lists permitted accounts, supports keyboard control and preserves selection on permission rejection");
   await page.locator("#deposit-amount").fill("0");
   await page.locator("#deposit-button").click();
   await waitUntil(async()=>(await page.locator("#form-message").textContent()).includes("greater than zero"));
@@ -128,6 +156,7 @@ try {
   await page.evaluate(()=>window.changeNetwork("0x1"));
   await waitUntil(()=>page.locator("#deposit-button").isDisabled());
   await page.locator("#connect-button").click();
+  await page.locator("#reconnect-wallet").click();
   await waitUntil(()=>page.locator("#deposit-button").isEnabled());
   mark("Wrong network disables writes and reconnection restores them");
   server.kill(); await new Promise(resolve=>server.once("exit",resolve));
@@ -160,13 +189,54 @@ try {
   assert.match(await page.locator("#activity-account").textContent(),new RegExp(await other.getAddress(),"i"));
   await page.evaluate(wallet=>window.changeWallet(wallet),await signer.getAddress());
   await waitUntil(async()=>await page.locator("#history-body tr").count()===20);
+  await page.locator("#connect-button").click();
+  await page.locator("#authorize-accounts").click();
+  await waitUntil(()=>page.locator("#connect-button").isEnabled());
+  await page.locator("#connect-button").click();
+  await page.locator('.wallet-account[data-account="'+await other.getAddress()+'"]').click();
+  await waitUntil(async()=>await page.locator("#history-body tr").count()===0);
+  assert.match(page.url(),new RegExp(await other.getAddress(),"i"));
+  await page.locator("#connect-button").click();
+  await page.locator('.wallet-account[data-account="'+await signer.getAddress()+'"]').click();
+  await waitUntil(async()=>await page.locator("#history-body tr").count()===20);
   await page.setViewportSize({width:390,height:844});
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),true);
   mark("All-activity page preserves the wallet, paginates every record and handles refresh/account changes");
+  mark("All-activity wallet menu switches the viewed account and updates its URL");
   await (await contract.withdrawAll()).wait();
   await page.goto(origin);
   await page.locator("#connect-button").click();
   await waitUntil(async()=>await page.locator("#owned-shares").textContent()==="0");
+  await page.locator("#connect-button").click();
+  await page.locator("#authorize-accounts").click();
+  await waitUntil(()=>page.locator("#connect-button").isEnabled());
+  await page.locator("#connect-button").click();
+  const menuBounds=await page.locator("#wallet-menu").boundingBox();
+  assert.ok(menuBounds.x>=0 && menuBounds.x+menuBounds.width<=390);
+  await page.locator('.wallet-account[data-account="'+await other.getAddress()+'"]').click();
+  await waitUntil(()=>page.locator("#deposit-button").isEnabled());
+  await page.locator("#deposit-amount").fill("0.000000000000000017");
+  await page.locator("#deposit-button").click();
+  await waitUntil(async()=>await page.locator("#owned-shares").textContent()==="0.000000000000000017");
+  assert.equal(await contract.shares(await other.getAddress()),17n);
+  assert.equal(await contract.shares(await signer.getAddress()),0n);
+  await page.locator("#withdraw-tab").click();
+  await page.locator("#withdraw-all-button").click();
+  await waitUntil(async()=>await page.locator("#owned-shares").textContent()==="0");
+  assert.equal(await contract.shares(await other.getAddress()),0n);
+  await page.reload();
+  await page.locator("#connect-button").click();
+  await waitUntil(async()=>(await page.locator("#account-label").textContent()).toLowerCase()===(await other.getAddress()).toLowerCase() && await page.locator("#owned-shares").textContent()==="0");
+  await waitUntil(async()=>await page.locator("#history-body tr").count()===2);
+  await page.evaluate(()=>sessionStorage.removeItem("test-permitted-accounts"));
+  await page.reload();
+  await page.locator("#connect-button").click();
+  await waitUntil(async()=>(await page.locator("#account-label").textContent()).toLowerCase()===(await signer.getAddress()).toLowerCase() && await page.locator("#owned-shares").textContent()==="0");
+  mark("Reload remembers an authorized selection and falls back when that account is no longer exposed");
+  await page.locator("#connect-button").click();
+  await page.locator('.wallet-account[data-account="'+await signer.getAddress()+'"]').click();
+  await waitUntil(()=>page.locator("#deposit-button").isEnabled());
+  mark("Second permitted account signs deposits and redemptions without relying on the first eth_accounts entry");
   await page.setViewportSize({width:390,height:844});
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),true);
   mark("Mobile layout does not overflow");
