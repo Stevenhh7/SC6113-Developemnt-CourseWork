@@ -1,309 +1,300 @@
-% Compile with pdfLaTeX (also compatible with standard TeX Live / Overleaf).
-% Author: Ji Chengyu, G2608005K.
-% Required evidence: screenshots/01-deployment.png, 02-wallet.png,
-% 03-history.png, 04-invalid-input.png, 06-redemption.png,
-% 07-backend.png, 08-render.png. Missing images are skipped with a warning.
-% Keep the final compiled report within the assignment's 5-8 page range.
+% Updated multi-investment report. Compile twice with pdfLaTeX.
+% Author: Ji Chengyu, G2608005K. Eight pages including references.
 \documentclass[10pt,a4paper]{article}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
-\usepackage{mathptmx}
-\usepackage[margin=2cm]{geometry}
-\usepackage{microtype}
-\usepackage{graphicx}
-\usepackage{tabularx,booktabs,array}
-\usepackage{xcolor}
-\usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta}
-\usepackage{placeins}
-\usepackage{titlesec}
+\usepackage{mathptmx,microtype}
+\usepackage[left=2cm,right=2cm,top=1.65cm,bottom=1.65cm]{geometry}
+\usepackage{graphicx,tabularx,booktabs,array,xcolor,tikz,titlesec}
+\usetikzlibrary{arrows.meta,positioning}
 \usepackage[font=small,labelfont=bf]{caption}
 \usepackage{hyperref}
 \hypersetup{colorlinks=true,linkcolor=black,citecolor=black,urlcolor=blue!55!black,
-  pdfauthor={Ji Chengyu},pdftitle={MicroInvest A Micro Investment Platform}}
+ pdfauthor={Ji Chengyu},pdftitle={MicroInvest: A Multi-Investment Platform}}
 \urlstyle{same}
+\graphicspath{{screenshots/}{report/screenshots/}}
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{4pt}
-\renewcommand{\baselinestretch}{1.0}
-\renewcommand{\arraystretch}{1.10}
-\titlespacing*{\section}{0pt}{10pt plus 2pt minus 1pt}{5pt}
-\titlespacing*{\subsection}{0pt}{8pt plus 2pt minus 1pt}{4pt}
 \setlength{\tabcolsep}{5pt}
-\setcounter{topnumber}{3}
-\setcounter{bottomnumber}{2}
-\renewcommand{\topfraction}{0.90}
-\renewcommand{\bottomfraction}{0.85}
-\renewcommand{\textfraction}{0.08}
-\graphicspath{{screenshots/}{report/screenshots/}}
-
-\newcommand{\insertreportimage}[4]{%
-  \begin{figure}[!htbp]
-    \centering
-    \includegraphics[width=#1,height=0.45\textheight,keepaspectratio]{#2}
-    \caption{#3}\label{#4}
-  \end{figure}%
-}
-\newcommand{\reportimage}[4][0.96\linewidth]{%
-  \IfFileExists{screenshots/#2}{\insertreportimage{#1}{screenshots/#2}{#3}{#4}}{%
-    \IfFileExists{report/screenshots/#2}{\insertreportimage{#1}{report/screenshots/#2}{#3}{#4}}{%
-      \PackageWarning{MicroInvest}{Screenshot #2 not supplied yet}%
-    }%
-  }%
-}
-
-\title{MicroInvest\\\large A Micro Investment Platform}
-\author{Ji Chengyu\\Student ID G2608005K\\\small SC6113 Individual Assignment Financial Decentralized Application}
-\date{7 October 2026}
+\renewcommand{\arraystretch}{1.12}
+\captionsetup{hypcap=false}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\titlespacing*{\section}{0pt}{9pt}{4pt}
+\titlespacing*{\subsection}{0pt}{7pt}{3pt}
+\newcommand{\reportfigure}[4]{\begin{center}
+ \includegraphics[width=0.97\linewidth,height=#2,keepaspectratio]{#1}
+ \captionof{figure}{#3}\label{#4}\end{center}}
+\newcommand{\continued}{\noindent\textbf{Testing and Results (continued)}\par}
 \begin{document}
 \begin{center}
 {\Large\bfseries MicroInvest\par}
-{\large A Micro Investment Platform\par}
-\vspace{4pt}
+{\large A Multi-Investment Platform\par}
+\vspace{3pt}
 Ji Chengyu \quad Student ID G2608005K\\
-SC6113 Individual Assignment Financial Decentralized Application\\
+SC6113 Individual Assignment: Financial Decentralized Application\\
 7 October 2026
 \end{center}
 
 \section{Introduction}
+MicroInvest is an educational financial DApp for investing beginners. Any connected user can deploy an independent Investment contract, give it a title and explanation, and publish it in a searchable directory. Other users discover a project, open its own detail page, deposit Sepolia test ETH, inspect their shares and redeem principal at any time. The application is available at \href{https://sc6113-developemnt-coursework.onrender.com/}{MicroInvest on Render}.
 
-MicroInvest is an educational financial DApp for investing beginners. Users deposit Sepolia test ETH into one pool, receive internal shares, inspect their position and redeem principal at any time. A Solidity contract connects to an English interface and Flask backend, deployed at \href{https://sc6113-developemnt-coursework.onrender.com/}{MicroInvest on Render}.
-
-One ETH equals one share, including fractions. Funds remain in the contract for withdrawals, with no market investment, yield, platform fee or administrator. Users pay network gas separately. The prototype demonstrates ownership, accounting and confirmation without suggesting investment returns.
+Each pool retains simple rules: 1 ETH equals 1 internal share, including fractions; no yield, platform fee or share transfer is offered. The creator has no privilege to withdraw other participants' funds. The project demonstrates discovery, custody, ownership and confirmed transactions rather than a real asset strategy.
 
 \section{Problem Statement}
+A beginner needs to find the intended project and understand where funds are held, how contributions determine ownership and how principal can be recovered. A contract address alone is hard to recognize. A single unnamed pool also offers no convenient way to choose between independent projects.
 
-A beginner must distinguish contributions, ownership and transaction cost, as well as wallet approval from blockchain confirmation. Unclear balances or withdrawal conditions make it difficult to understand where funds are held and how to recover them.
-
-MicroInvest addresses this through fractional deposits, visible share conversion and partial or full redemption. On-chain state determines each account's entitlement; confirmed events provide history. Market allocation, diversification and capital growth are outside the prototype's scope.
+MicroInvest associates a public title and explanation with a verified contract and a unique directory ID. Name/keyword search improves discovery; separate contract ledgers isolate participants' positions. Exact share conversion, clear transaction status and accessible history make the contribution and redemption process visible.
 
 \section{Objectives}
-
-The objectives are to implement exact fractional ownership in Solidity; enable MetaMask connection and account selection; support deposits and caller-bound principal redemption; provide useful Flask queries for positions, events and receipts; and distinguish validation errors, wallet rejection, pending transactions and mined results. Evaluation covers contract authorization, accounting, common failure paths, interface behavior and measured gas. The source, deployment details, README and report follow the assignment requirements \cite{assignment}.
+The objectives are to provide user-created named pools and keyword discovery; integrate MetaMask with a responsive web interface; implement exact fractional shares and caller-bound redemption; persist project metadata and confirmed activity; and evaluate authorization, error handling, usability and gas. The submission follows the coursework requirements and all 13 report sections \cite{assignment}.
 
 \section{System Architecture}
+The browser uses Flask APIs for project search, metadata, pool state, positions and history. MetaMask signs deployments, deposits and redemptions directly on Sepolia. After deployment, the creator signs a separate registration message; Flask verifies the actual creation and recovered signer before publishing metadata. Flask holds no wallet private key.
 
-The application separates reads from signed writes. The browser obtains public configuration, pool state, individual positions and transaction history from Flask. Web3.py queries the configured Sepolia JSON-RPC service. Deposits and redemptions are constructed with ethers and submitted through MetaMask after user approval. The backend does not sign transactions or hold the user's private key.
-
-
-\begin{figure}[htbp]
-\centering
+\begin{center}
 \begin{tikzpicture}[
-  block/.style={draw=black!45,fill=black!3,rounded corners=2pt,
-    text width=3.0cm,minimum height=1.45cm,align=center,font=\small},
-  link/.style={-{Stealth[length=2mm]},draw=black!70,thick},
-  note/.style={font=\footnotesize,align=center}]
-\node[block] (browser) at (0,0) {\textbf{Browser interface}\\HTML CSS JavaScript};
-\node[block] (backend) at (4.7,1.45) {\textbf{Flask and Web3.py}\\Render and Gunicorn};
-\node[block] (wallet) at (4.7,-1.45) {\textbf{MetaMask}\\Private keys and approval};
-\node[block] (chain) at (9.4,0) {\textbf{Ethereum Sepolia}\\MicroInvest contract};
-\draw[link] (browser.north east) -- node[note,above,sloped] {Query} (backend.west);
-\draw[link] (backend.east) -- node[note,above,sloped] {RPC reads} (chain.north west);
-\draw[link] (browser.south east) -- node[note,below,sloped] {Request} (wallet.west);
-\draw[link] (wallet.east) -- node[note,below,sloped] {Submit tx} (chain.south west);
+ block/.style={draw=black!45,fill=black!3,rounded corners=2pt,text width=3.15cm,
+ minimum height=1.15cm,align=center,font=\small},
+ link/.style={-{Stealth[length=2mm]},thick,draw=black!65},
+ note/.style={font=\scriptsize,align=center}]
+\node[block] (ui) at (0,0) {\textbf{Browser interface}\\HTML / CSS / JavaScript};
+\node[block] (api) at (4.6,1.25) {\textbf{Flask / Web3.py}\\Render / Gunicorn};
+\node[block] (wallet) at (4.6,-1.25) {\textbf{MetaMask}\\User signing / approval};
+\node[block] (db) at (9.2,1.9) {\textbf{PostgreSQL}\\Directory / event index};
+\node[block] (chain) at (9.2,-0.8) {\textbf{Ethereum Sepolia}\\Independent pool contracts};
+\draw[link] (ui.north east) -- node[note,above=3pt,sloped]{API calls}(api.west);
+\draw[link] (ui.south east) -- node[note,below=3pt,sloped]{Approval}(wallet.west);
+\draw[link] (api.north east) -- node[note,above=3pt,sloped,pos=.4]{Store / search}(db.west);
+\draw[link] (api.south east) -- node[note,above,sloped]{Verify / read}(chain.north west);
+\draw[link] (wallet.east) -- node[note,below=4pt,sloped,pos=.65]{Submit tx}(chain.south west);
 \end{tikzpicture}
-\caption{System architecture and the boundary between queries and wallet signing.}
+\captionof{figure}{Metadata and confirmed history use a database; funds and entitlements remain on-chain.}
 \label{fig:architecture}
-\end{figure}
+\end{center}
+PostgreSQL stores the directory and an index of confirmed events. Contract state remains authoritative for balances and redemption rights. Local SQLite is a development fallback. Every project-specific query selects its own contract and deployment block; losing directory data does not move funds, but prevents discovery until metadata is restored.
 
-The contract is the source of truth. No database is used; Flask reconstructs confirmed balances and events from the chain after restart. Browser storage retains transaction hashes and preferred accounts per pool/network but cannot grant permissions or establish balances.
-
-Every blockchain API query verifies the configured chain and exact deployed runtime bytecode. Pool and position calls use a snapshot block. History scans are bounded to 5,000 blocks per request, with log requests split into chunks of at most 1,000 blocks. An exclusive block/log-index cursor supports older pages without repeating events when several records share a block.
-
+\clearpage
 \section{Technologies Used}
-
-\begin{table}[htbp]\centering\small
-\caption{Technologies and their roles}\label{tab:technology}
-\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.19\linewidth}>{\raggedright\arraybackslash}p{0.3\linewidth}>{\raggedright\arraybackslash}X@{}}
-\toprule
-\textbf{Layer} & \textbf{Technology} & \textbf{Role} \\
+\begin{center}\small
+\captionof{table}{Technologies and responsibilities}\label{tab:technology}
+\begin{tabularx}{\linewidth}{@{}p{0.19\linewidth}p{0.29\linewidth}X@{}}
+\toprule\textbf{Layer} & \textbf{Technology} & \textbf{Role} \\
 \midrule
-Contract & Solidity 0.8.30 & Custody, shares, caller authorization and events \\
-Development tools & Node.js 24, Hardhat 3, pnpm & Compilation, local chain, contract and browser tests \\
-Browser & HTML, CSS, JavaScript, ethers 6 & Responsive pages and wallet transaction construction \\
-Backend & Python 3.12, Flask, Web3.py & Validated read-only blockchain APIs \\
-Wallet and network & MetaMask, Ethereum Sepolia & User approval, signing and testnet execution \\
-Hosting and workflow & Render, Gunicorn, GitHub, VS Code & Web hosting, source control and development \\
+Contract & Solidity 0.8.30 & Per-pool custody, exact shares and guarded redemption \\
+Development & Node.js 24, Hardhat 3, pnpm & Compile, local chain, contract/browser tests \\
+Frontend & HTML, CSS, JavaScript, ethers 6 & Discovery, project pages and wallet requests \\
+Backend & Python 3.12, Flask, Web3.py & Signed registration and validated chain reads \\
+Database & SQLAlchemy, PostgreSQL / SQLite & Online metadata/event persistence; local fallback \\
+Wallet / network & MetaMask, Ethereum Sepolia & User signing and testnet execution \\
+Hosting / workflow & Render, Gunicorn, GitHub, VS Code & Hosted Python service and development \\
 \bottomrule
 \end{tabularx}
-\end{table}
-
-Node.js supports development and testing; the deployed service runs Python and Gunicorn. Committed artifacts and the ethers bundle avoid Solidity compilation or Node.js installation during the web build. Gunicorn supplies the production WSGI server \cite{flask,render}.
+\end{center}
+Node.js is development tooling; the hosted backend remains Python. Committed contract artifacts and the ethers bundle avoid a Node/Solidity build on Render. Gunicorn serves Flask, and \texttt{DATABASE\_URL} connects SQLAlchemy to PostgreSQL \cite{sqlalchemy}. SQLite files are unsuitable for Render's ephemeral filesystem \cite{render}.
 
 \section{Smart Contract Design}
+Each Investment deploys the unchanged \texttt{MicroInvest.sol} bytecode with its own balance and ledger. \texttt{shares[address]} and \texttt{totalShares} use unsigned integers. One displayed share has $10^{18}$ units, so deposited wei equals credited share units without rounding.
 
-\texttt{MicroInvest.sol} stores \texttt{shares[address]} and \texttt{totalShares} as unsigned integer units. One displayed share has 18 decimal places, so a deposit's wei value directly equals the credited share units. This avoids rounding in conversion. The supported accounting invariants are that total shares equal the sum of user shares, each user's redeemable wei equals their shares, and contract balance is at least the recorded principal.
-
-\begin{table}[htbp]\centering\small
-\caption{Contract methods and validation}\label{tab:contract}
-\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.3\linewidth}>{\raggedright\arraybackslash}p{0.37\linewidth}>{\raggedright\arraybackslash}X@{}}
-\toprule
-\textbf{Method} & \textbf{State transition} & \textbf{Validation} \\
+\begin{center}\small
+\captionof{table}{State transitions and contract validation}\label{tab:contract}
+\begin{tabularx}{\linewidth}{@{}p{0.29\linewidth}p{0.37\linewidth}X@{}}
+\toprule\textbf{Method} & \textbf{Transition} & \textbf{Validation} \\
 \midrule
-\texttt{deposit()} & Credit the caller and total shares by \texttt{msg.value} & Deposit is greater than zero \\
-\texttt{withdraw(amountWei)} & Debit caller and total; send the same amount to caller & Positive amount and sufficient caller shares \\
-\texttt{withdrawAll()} & Redeem the caller's entire nonzero position & Caller has shares \\
-\texttt{shares(address)} and \texttt{totalShares()} & Read ledger balances & No state change \\
+\texttt{deposit()} & Credit caller and total by \texttt{msg.value} & Positive deposit \\
+\texttt{withdraw(amountWei)} & Debit caller/total; send equal wei to caller & Positive amount within caller shares \\
+\texttt{withdrawAll()} & Redeem caller's complete position & Nonzero caller shares \\
+Ledger / accounting reads & Return shares, principal, balance and excess & No state change \\
 \bottomrule
 \end{tabularx}
-\end{table}
+\end{center}
+For example, a 0.003 ETH deposit creates 0.003 shares; a 0.001 ETH redemption leaves 0.002. Full exit clears that position. Gas is paid separately and is not reimbursed with principal. Each pool enforces:
+\[
+\mathrm{totalShares}=\sum_i\mathrm{shares}_i,\qquad
+\mathrm{redeemableWei}_i=\mathrm{shares}_i,\qquad
+\mathrm{balanceWei}\geq\mathrm{totalShares}.
+\]
+Authorization follows \texttt{msg.sender}. A creator can participate but cannot redeem anyone else's position. There is no owner, pause, upgrade, transferable token or investment manager. Pool A and Pool B have separate storage even when the same wallet participates in both.
 
-For example, depositing 0.003 ETH credits 0.003 shares. Redeeming 0.001 debits exactly that amount, leaving 0.002. Full redemption then clears the position. Gas is charged to the wallet separately, so redeeming all principal does not restore gas previously spent.
+Withdrawals validate entitlement, debit state and then transfer ETH. A reentrancy lock blocks nested calls; failed transfers revert the ledger change. These decisions follow checks-effects-interactions \cite{solidity}. Adversarial receivers test refusal of ETH and attempted nested withdrawal.
 
-Authorization follows \texttt{msg.sender}: a transaction changes only the calling account's entitlement. Shares cannot be transferred. The deploying account receives no withdrawal privilege, and the contract has no owner, pause or upgrade function. These decisions keep the participant's rules explicit, while also removing administrative recovery options.
+\texttt{Deposited} and \texttt{Withdrawn} events identify the investor, amount and resulting shares. Only successful confirmed events enter business history. Pending/reverted transactions and wallet rejections create no successful event row. Forced ETH is excess balance, not new shares or yield.
 
-Withdrawals check entitlement, debit state and then transfer ETH. A reentrancy lock blocks nested entry; a failed transfer reverts the entire operation, including the ledger debit. This follows the checks-effects-interactions principle described in Solidity's security guidance \cite{solidity}. Tests use both a receiver that refuses ETH and a receiver that attempts a nested withdrawal.
+The optimizer uses 200 runs; operations change a fixed amount of storage without iterating over investors. Historical receipt gas appears in Section 9. Reusing tested bytecode adds independent projects without adding creator privileges or changing principal accounting.
 
-\texttt{Deposited} and \texttt{Withdrawn} events contain an indexed investor, the wei amount and resulting shares. Successful events support confirmed history. A wallet rejection or reverted operation creates no successful business event. ETH forcibly received outside \texttt{deposit()} is reported as excess balance and creates no new shares or yield.
-
-The compiler optimizer is enabled with 200 runs. Contract operations change a fixed amount of storage and do not loop over investors. Gas measurements are reported in Section 9; they are evidence from specific transactions rather than a guarantee of future cost.
-
+\clearpage
 \section{Application Design}
+The English interface begins with an Explore directory. Users search names or words from explanations, browse paged results, or filter projects by the connected creator. Matching is literal and case-insensitive; whitespace-separated terms must all match. IDs and addresses distinguish projects even when titles are identical. This is keyword search, not semantic search.
 
-The dark English overview explains the testnet, fixed share conversion, zero platform fee and separate gas cost. It combines deposit/redemption controls with personal shares, redeemable principal and wallet balance. Separate controls support partial redemption and full exit. Labels, visible feedback and responsive layouts support the intended beginner audience.
+A project opens \path{/investments/<id>} with its title, explanation, contract address, pool metrics, deposit/redemption controls and personal position. Its own activity page preserves project and wallet scope. The detail preview shows the five newest confirmed records; full activity loads 20-row pages and older records. Empty recent block ranges are traversed automatically.
 
-A connected wallet address opens an account menu on both the overview and activity page. The list uses addresses actually exposed by \texttt{eth\_accounts}. Manage accounts requests wallet permission after a user click; selecting an account refreshes its position and history. Before signing, the application confirms that the selected account is still authorized and uses \texttt{getSigner(selectedAddress)}, even when it is not the first address returned. Provider account/network events and permission requests follow the interfaces in \cite{provider,permissions}.
+\begin{center}
+\begin{minipage}[t]{0.46\linewidth}
+\vspace{0pt}
+\includegraphics[width=\linewidth,trim=15 425 795 30,clip]{09-directory-search.jpg}
+\vspace{5pt}
+\small The live filter uses \texttt{test1}. The matching project card identifies Investment \#2, its explanation and the contract link. The complete capture is retained with the report source.
+\end{minipage}\hfill
+\begin{minipage}[t]{0.46\linewidth}
+\vspace{0pt}
+\includegraphics[width=\linewidth,trim=15 25 795 305,clip]{09-directory-search.jpg}
+\end{minipage}
+\captionof{figure}{Two readable crops from one live search capture: the keyword filter and its matching independently deployed project.}
+\label{fig:search}
+\end{center}
 
-The overview shows the five newest confirmed records. View all activity opens a separate page that initially shows 20 records and loads older cursor pages. Links point to actual Sepolia transactions. The complete history page also accepts a public wallet address for read-only viewing.
+The wallet menu lists only accounts authorized by MetaMask. Selecting one refreshes its positions/history; every transaction explicitly uses that selected signer. Provider account/network events follow EIP-1193 \cite{provider}. Wrong-network or unavailable-data states disable writes. Account changes cancel stale responses and do not carry another account's pending state into the current view.
 
+\reportfigure{02-wallet.png}{0.31\textheight}{Student-supplied MetaMask account menu on Sepolia. The same account-selection behavior is retained on the updated project pages.}{fig:wallet}
 
-\begin{figure}[htbp]
-\centering
-\begin{tikzpicture}[
-  stage/.style={draw=black!45,fill=black!3,rounded corners=2pt,
-    text width=2.12cm,minimum height=1.25cm,align=center,font=\small},
-  link/.style={-{Stealth[length=2mm]},draw=black!70,thick}]
-\node[stage] (input) {\textbf{Input}\\Validate amount};
-\node[stage,right=3mm of input] (wallet) {\textbf{Wallet}\\Approve or decline};
-\node[stage,right=3mm of wallet] (pending) {\textbf{Pending}\\Retain hash};
-\node[stage,right=3mm of pending] (receipt) {\textbf{Receipt}\\Check status};
-\node[stage,right=3mm of receipt] (refresh) {\textbf{Refresh}\\Read position};
-\draw[link] (input) -- (wallet);
-\draw[link] (wallet) -- (pending);
-\draw[link] (pending) -- (receipt);
-\draw[link] (receipt) -- (refresh);
-\end{tikzpicture}
-\caption{Transaction feedback distinguishes wallet approval from a mined result.}
-\label{fig:lifecycle}
-\end{figure}
+Approval, pending hash, mined success and revert are distinct states. On confirmation the page rereads the selected contract; delayed confirmation retains the hash for recovery. Exact input validation uses integer wei and \texttt{BigInt}. The UI explains test ETH, fixed shares, no returns/platform fee and separate network gas.
 
-A rejected wallet request is shown as declined. A submitted hash is pending until a receipt is available. A successful receipt refreshes the position; a failed receipt reports a revert. If confirmation is delayed, the hash is retained for later checking. Account changes clear previous data, and older asynchronous responses cannot overwrite the new account's position.
-
-\reportimage{02-wallet.png}{Connected MetaMask account on Sepolia with a second authorized account available in the account menu.}{fig:02-wallet}
-
+\clearpage
 \section{Implementation}
+The backend separates \texttt{catalog.py} (metadata/search), \texttt{chain.py} (validated blockchain reads) and \texttt{history.py} (persistent activity synchronization). Templates and browser modules provide Explore, creation, detail and full-history pages. Jinja escaping and \texttt{textContent} keep creator text as data.
 
-The repository contains the business contract and adversarial tests, an exported ABI/bytecode artifact, Flask routes, the blockchain query service, HTML templates and JavaScript modules. The browser actively calls \path{/api/config}, \path{/api/pool}, \path{/api/position/<wallet>}, \path{/api/history/<wallet>} and \path{/api/transactions/<hash>}. Flask validates addresses, hashes and pagination parameters and returns amounts as decimal strings. JavaScript uses \texttt{BigInt} for wei rather than floating-point arithmetic.
+Creation has two approvals: MetaMask first deploys the supported artifact; after a successful receipt the creator signs an EIP-191 registration message \cite{signature}. The message binds the title, explanation, creation hash, chain and HTTP origin. Flask checks successful direct creation, exact creation/runtime bytecode and signer equality with the actual deployer. It saves server-derived address/block/creator and returns a unique ID. Identical retries reuse the same entry; conflicting metadata is rejected. A declined registration can resume with the existing creation hash, avoiding a second deployment.
 
-The MetaMask deployment page lets the user deploy without supplying a private key to Flask. Public deployment metadata records the address and deployment block. On Render, the build installs \texttt{requirements.txt} and Gunicorn starts \texttt{app:app}. Environment configuration identifies Sepolia, its RPC endpoint and this deployed pool; \texttt{/healthz} checks process readiness, while \texttt{/api/pool} verifies real blockchain access.
+\reportfigure{10-create-form.jpg}{0.28\textheight}{Updated creation form with required title and explanation. This capture illustrates the form without submitting a deployment.}{fig:create}
 
-\FloatBarrier
+\begin{center}\small
+\captionof{table}{Database responsibilities and identity keys}\label{tab:database}
+\begin{tabularx}{\linewidth}{@{}p{0.22\linewidth}X@{}}
+\toprule\textbf{Table} & \textbf{Stored data / identity} \\
+\midrule
+\texttt{investments} & ID, network, unique address/creation hash, creator, title, explanation, deployment block, search text and UTC creation time \\
+\texttt{history\_events} & Wallet, exact wei/shares, block/hash/time; unique network + contract + transaction hash + log index \\
+\texttt{history\_ranges} & Network, contract, wallet, completed start/end blocks and canonical end-block hash \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\reportfigure{11-project-detail.jpg}{0.18\textheight}{Live independent detail page for directory ID 2, \texttt{test1}, linked to its own Sepolia contract.}{fig:detail}
+
+API requests carry \texttt{investment=<id>}; invalid IDs fail instead of falling back to another pool. SQL parameters constrain search. The published schema is \path{docs/schema.sql}; \path{scripts/export-catalog.py --include-history} exports public directory/index data. The database holds no private keys and cannot authorize a withdrawal.
+
+\clearpage
 \section{Testing and Results}
+Automated evaluation uses contract tests, backend tests, frontend tests and a real browser against Flask and a local Hardhat chain. The automated wallet simulates EIP-1193; backend unit tests mock RPC. Real MetaMask/Render testing is a separate student-reported acceptance result.
 
-Automated testing combines contract tests, backend unit tests, exact-amount tests and an actual browser against Flask and a local Hardhat chain. The browser's EIP-1193 wallet is simulated. Backend unit tests mock the RPC boundary; the integration suite supplies real local state changes. These results do not by themselves prove real MetaMask behavior or hosted operation.
-
-\begin{table}[htbp]\centering\small
-\caption{Automated testing results}\label{tab:tests}
-\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.2\linewidth}>{\raggedright\arraybackslash}p{0.25\linewidth}>{\raggedright\arraybackslash}X@{}}
-\toprule
-\textbf{Suite} & \textbf{Result} & \textbf{Evaluation covered} \\
+\begin{center}\small
+\captionof{table}{Recorded automated results for the updated source}\label{tab:tests}
+\begin{tabularx}{\linewidth}{@{}p{0.22\linewidth}p{0.17\linewidth}X@{}}
+\toprule\textbf{Suite} & \textbf{Result} & \textbf{Coverage} \\
 \midrule
-Contract & 12 passed, 6 October & Exact units, isolation, transfer rollback, reentrancy and a 40-operation accounting sequence \\
-Flask backend & 17 passed, 7 October & Validation, public configuration, bytecode/network checks, receipt states and cursor boundaries \\
-Amount and error handling & 4 passed, 7 October & One wei, large integers, invalid decimals and safe wallet errors \\
-Browser integration & 19 checks passed, 7 October & Deposit/exit flow, account selection/signing, five-record preview, pagination, mobile layout and RPC failure \\
+Contract & 12 passed & Unchanged contract; accounting, caller isolation, rollback/reentrancy, 40-operation sequence \\
+Backend & 54 passed & Metadata/signatures, search, project scope, persistent history, checkpoints and errors \\
+Frontend & 9 passed & Exact amounts/errors, empty-range paging, cancellation and cursor progress \\
+Browser & 24 checks passed & Creation/retry, two creators/pools, deposits/exit, scope, mobile layout and restart recovery \\
+PostgreSQL integration & 1 skipped locally & Dedicated PostgreSQL case configured in CI; not claimed as a recorded pass \\
 \bottomrule
 \end{tabularx}
-\end{table}
+\end{center}
 
-For invalid input, zero, negative, exponential, nonnumeric and over-precision values are rejected. Excess redemption cannot spend another account's shares. Refusing a wallet request leaves contract state unchanged. Simulated network changes disable writes; an RPC outage displays an unavailable position instead of inventing a zero balance. At a 390-pixel viewport, the document and account menu remain within the screen width.
+The local integration flow invests 0.005 ETH in one pool and 0.002 in another, then redeems the first while preserving the second. It checks keyword/creator search, immutable retry, account selection and catalog persistence after Flask restart. After 6,000 inactive blocks, a fresh detail page still recovers five newest records; full history loads all 21 local events without duplicates. Checkpoint changes rebuild the scoped index, while failed RPC synchronization preserves stored rows.
 
-I completed functional testing on Render with MetaMask. Independent read-only checks on 7 October returned HTTP 200 for the home, configuration, health and pool endpoints, identifying chain 11155111 and the expected contract. That snapshot showed a solvent pool with zero principal and eight confirmed participant events. A later history screenshot contains nine records, including a subsequent 0.04 ETH deposit. The supplied API snapshot shows 0.04 ETH principal and balance at block 11857366, with zero excess and \texttt{solvent: true}. The later confirmed redemption at block 11857372 shows zero personal shares and redeemable principal. These screenshots document different blocks rather than conflicting balances.
+\reportfigure{04-invalid-input-crop.png}{0.28\textheight}{Student-supplied negative deposit validation (crop): -1 is rejected before a wallet transaction request.}{fig:invalid}
 
-\begin{table}[htbp]\centering\small
-\caption{Confirmed Sepolia principal lifecycle}\label{tab:live}
-\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.39\linewidth}>{\raggedright\arraybackslash}p{0.18\linewidth}>{\raggedright\arraybackslash}p{0.17\linewidth}>{\raggedright\arraybackslash}X@{}}
-\toprule
-\textbf{Observed Sepolia operation} & \textbf{Amount in ETH} & \textbf{Shares after} & \textbf{Block} \\
+Zero, nonnumeric, exponential and over-precision amounts are rejected. Excess redemption cannot spend another wallet's shares. Invalid/tampered registration signatures and unsupported deployment code fail. RPC/database failures produce explicit errors; unavailable positions are not invented as zero balances. A 390-pixel local viewport was checked for horizontal overflow.
+
+\reportfigure{01-deployment-crop.png}{0.22\textheight}{Original successful Sepolia deployment (crop), retained as a valid instance of the unchanged contract: chain 11155111, block 11856501.}{fig:deployment}
+
+\clearpage
+\continued
+\subsection*{Live contracts and principal lifecycle}
+I successfully tested the updated application on Render with MetaMask after redeployment on 7 October 2026. Independent read-only checks verified the live directory/search, both pool APIs, the new browser module and database-backed history. The directory contains the original pool and a separately created \texttt{test1} project:
+
+\begin{center}\small
+\captionof{table}{Observed live Investment contracts}\label{tab:projects}
+\begin{tabularx}{\linewidth}{@{}L{0.04\linewidth}L{0.26\linewidth}X@{}}
+\toprule\textbf{ID} & \textbf{Title / creation block} & \textbf{Contract address} \\
 \midrule
-Deposit & 0.003 & 0.003 & 11856700 \\
-Partial redemption & 0.001 & 0.002 & 11856703 \\
-Full redemption & 0.002 & 0 & 11856705 \\
+1 & Original MicroInvest Pool / 11856501 & {\scriptsize\texttt{0xE560121978f80c390f6B0d091E9579A2812Cb3DD}} \\
+2 & test1 / 11863263 & {\scriptsize\texttt{0xeF576e1DD88bFedD50a8f1e7d725bF71d5399565}} \\
 \bottomrule
 \end{tabularx}
-\end{table}
+\end{center}
+Both observed directory entries were created by the same participant; the two-creator isolation claim comes from the local browser suite. Earlier Sepolia transactions remain valid evidence of the unchanged contract's principal lifecycle:
 
-All three receipts report success. Their full transaction hashes and raw API evidence are retained in \path{docs/evidence/live-validation-2026-10-07.json}. The chain record proves the debit/credit sequence; screenshots illustrate the corresponding user experience.
-
-\begin{table}[htbp]\centering\small
-\caption{Gas used in separate local and Sepolia observations}\label{tab:gas}
-\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.35\linewidth}>{\raggedright\arraybackslash}p{0.25\linewidth}>{\raggedright\arraybackslash}X@{}}
-\toprule
-\textbf{Operation} & \textbf{Local receipt gas} & \textbf{Observed Sepolia receipt gas} \\
+\begin{center}\small
+\captionof{table}{Earlier confirmed Sepolia operations and measured gas}\label{tab:gas}
+\begin{tabularx}{\linewidth}{@{}p{0.24\linewidth}p{0.14\linewidth}p{0.13\linewidth}p{0.18\linewidth}X@{}}
+\toprule\textbf{Operation} & \textbf{ETH} & \textbf{Shares after} & \textbf{Block} & \textbf{Gas used} \\
 \midrule
-Deposit & 71,884 & 245,994 \\
-Partial redemption & 50,282 & 53,700 \\
-Full redemption & 50,272 & 50,912 \\
+Deposit & 0.003 & 0.003 & 11856700 & 245,994 \\
+Partial redemption & 0.001 & 0.002 & 11856703 & 53,700 \\
+Full redemption & 0.002 & 0 & 11856705 & 50,912 \\
 \bottomrule
 \end{tabularx}
-\end{table}
+\end{center}
+The original creation used 1,814,581 gas. Separate local deposit/partial/full-exit observations used 71,884/50,282/50,272 gas with different amounts and environments; these are not a controlled performance comparison. Actual fee is gas used times effective gas price. No new-project throughput or PostgreSQL latency benchmark was performed.
 
-These are separate observations with different transaction amounts and execution environments. The local cases used 0.01 ETH for the first deposit, 333 wei for partial exit and 999 wei for full exit. Actual fee is receipt gas multiplied by effective gas price. The three Sepolia transactions cost 0.000622855710866760, 0.000132064592365200 and 0.000127495073925600 ETH respectively. No throughput benchmark or novice-user study was conducted.
+\reportfigure{06-redemption.png}{0.32\textheight}{Student-supplied confirmed 0.04 ETH redemption at block 11857372, leaving zero personal shares and redeemable principal. This same transaction was recovered from the hosted history index.}{fig:redemption}
 
-\reportimage{03-history.png}{Complete activity page showing confirmed deposits and redemptions, including the 0.003 ETH deposit, 0.001 ETH partial redemption and 0.002 ETH full exit.}{fig:03-history}
+\href{https://sepolia.etherscan.io/tx/0x45dba804763f4d53c4da30957b3d4da0f02dd15eecb65762a904926f99efd2ea}{Original creation receipt} | \href{https://sepolia.etherscan.io/tx/0x5f3b67afb977a0e2c4e53738b14266a406df702a4b700f78bebf0664e1e11a0a}{test1 creation transaction} | \href{https://sepolia.etherscan.io/tx/0xb5fc592ccafcfbc8a5724b5384df947e7083c11028f2d01aadaa6d50962bafec}{Recovered redemption transaction}
 
-\reportimage[0.46\linewidth]{07-backend.png}{Pool API at block 11857366: 0.04 ETH principal and contract balance, zero excess and solvent true, before the later redemption.}{fig:07-backend}
+\clearpage
+\continued
+\subsection*{Database history and hosted deployment}
+The history API now returns \texttt{source: "database"} and the latest five original-pool records, including the confirmed 0.04 ETH redemption in block 11857372. Completed scan ranges include empty intervals; missing ranges are fetched in windows of at most 5,000 blocks, using RPC chunks of at most 1,000. Exact events are upserted without duplicates, and subsequent queries use the stored coverage plus any newly mined blocks.
 
-\reportimage{06-redemption.png}{Confirmed redemption at block 11857372 with zero personal shares and zero redeemable principal.}{fig:06-redemption}
+The server checks the latest stored end-block hash against the chain. A changed checkpoint invalidates only that wallet/pool index for rebuilding; a hash change during scanning aborts the write. The index improves recovery across application restarts but still requires RPC validation. The UI fills its five-record preview or 20-row history page across empty ranges rather than declaring an empty first range to be the complete history.
 
-\subsection*{Deployment and live evidence}
+\begin{center}
+\begin{minipage}{0.94\linewidth}\small
+\hrule\medskip
+\textbf{Verified live history response (abbreviated)}
+\begin{verbatim}
+{
+  "items": [{
+    "type": "withdrawal", "amountEth": "0.04",
+    "blockNumber": 11857372, "sharesAfter": "0",
+    "transactionHash": "0xb5fc...afec"
+  }, ...],
+  "source": "database"
+}
+\end{verbatim}
+\medskip\hrule
+\end{minipage}
+\captionof{figure}{Selected fields from the independently verified live API response. The complete JSON is retained in the updated evidence file; this is an excerpt, not a browser screenshot.}
+\label{fig:database-history}
+\end{center}
 
-The pool is deployed at \texttt{0xE560121978f80c390f6B0d091E9579A2812Cb3DD} on Sepolia. Its creation receipt is successful in block 11856501 and used 1,814,581 gas. Exact runtime bytecode matches the committed artifact. The deploying account is an ordinary participant.
+\reportfigure{12-current-history.jpg}{0.23\textheight}{Current full-activity page for the original Investment, showing its recovered confirmed records in project-specific history.}{fig:current-history}
 
-\href{https://sepolia.etherscan.io/tx/0x45dba804763f4d53c4da30957b3d4da0f02dd15eecb65762a904926f99efd2ea}{Deployment transaction} | \href{https://sepolia.etherscan.io/tx/0x0304792edcd32dc589e6e5c7756f86fdc33a283c295b78772a8e323b4d490798}{Deposit transaction} | \href{https://sepolia.etherscan.io/tx/0xcb3ebbe7044daf65d6129d01cb936cfaa9ccc8553b347ebccbe13a09b477804e}{Partial redemption} | \href{https://sepolia.etherscan.io/tx/0xe47ab65933833624b02fddd362fcce5ade0c734d1626790b3239831ff4f06e9a}{Full redemption}
+\begin{center}
+\includegraphics[width=0.52\linewidth,height=0.18\textheight,keepaspectratio]{13-render-status.png}
+\captionof{figure}{Student-supplied Render status showing the updated commit \texttt{b6941a7} as Deploy succeeded / Live. The image is cropped to the status and source fields.}
+\label{fig:render}
+\end{center}
 
-\reportimage{01-deployment.png}{Deployment confirmation showing Sepolia chain ID 11155111, the deployed contract address and block 11856501.}{fig:01-deployment}
+Render initializes the catalog before Gunicorn starts. After clearing the build cache and redeploying, public source files matched \texttt{b6941a7} and database history succeeded. The earlier stale-code cause was not established. Process liveness at \texttt{/healthz} was checked separately from directory, pool and history reads.
 
-\reportimage{04-invalid-input.png}{A negative deposit amount of -1 ETH with a message requiring a positive ETH amount.}{fig:04-invalid-input}
+Student acceptance, earlier receipts, local tests and current API checks are distinct evidence. Hosted restart persistence and the dedicated PostgreSQL test were not independently rerun in this revision.
 
-\reportimage{08-render.png}{Render deployment succeeded and Live for commit b65f9c3, with Gunicorn startup logs and the public service URL.}{fig:08-render}
-
-The interface validates exact amounts and wallet context; Solidity independently enforces positive values and caller ownership. Flask rejects malformed query parameters and exposes no write endpoint. Private keys stay in MetaMask; RPC credentials stay server-side. Sanitized errors and a Content Security Policy reduce exposure and unsafe content.
-
-Addresses, events and amounts remain public despite the absence of a database. No identity profiles are collected. The interface explains test ETH and the absence of returns. Usability observations come from functional checks and my walkthrough; no controlled beginner study was conducted.
-
-\FloatBarrier
+\clearpage
 \section{Challenges Encountered}
+Exact integer wei and string API amounts avoided rounding across Python, Solidity and JavaScript. Selecting the authorized signer explicitly fixed reliance on the first wallet account. Adding projects required every request, position, history page and pending hash to carry its own contract/wallet context. Registration needed deployment verification and signature binding so a participant could not claim another creator's contract.
 
-Integer wei and string responses solved cross-layer decimal precision. Separate signing, pending, mined and unknown states prevented premature success messages. Bounded history queries and block/log-index cursors handled RPC limits and same-block events. Account selection required the selected authorized signer; separating public artifacts from runtime secrets kept Render deployment reproducible.
+Old transactions appeared missing when the latest 5,000-block window was empty. Following the next cursor recovered them; persistent event/range tables and automatic older-range loading resolved the presentation issue. Separating live deployment status from actual endpoint verification also exposed stale served code during the hosted update.
 
 \section{Limitations}
+Pools hold principal without market allocation, diversification, yield or a guarantee of investment value. One mined confirmation is sufficient for interface feedback, but is not finality. Public RPC and database availability affect reads/discovery; initial historical backfill may require several requests. Literal search is not semantic search, and published titles/explanations cannot be edited or moderated in this version.
 
-The prototype holds principal without a market strategy, diversification or yield. One mined confirmation is sufficient for its feedback but is not chain finality. Public RPC availability and wallet behavior affect operation, and old inactive history can require several page requests. There is no formal external security audit, load test or beginner usability study. With no administrator or upgrade mechanism, there is no administrative rescue path for excess ETH. The testnet prototype is not evaluated for custody of real savings.
+Addresses, contract activity and creator text are public; no identity profile or private key is stored. Signed metadata proves the deployer's authorization, not the truth of an investment explanation. Direct MetaMask deployments are supported; factory/smart-contract-wallet creation is outside scope. There is no external security audit, load test, novice-user study, complete accessibility audit or administrative rescue/upgrade path. The prototype is evaluated with test ETH rather than real savings. Render Free PostgreSQL expires 30 days after creation unless upgraded \cite{render}.
 
 \section{Future Improvements}
-
-Future work includes beginner usability testing, clearer delayed-transaction recovery, an event index with reorganization handling and multiple wallet providers. Real investment strategies, transferable tokens or additional assets require a separate specification, risk model and security review.
+Future work includes beginner usability studies, moderation and metadata amendment with clear authorization, better search relevance, multiple wallet providers and monitored incremental indexing. Database backups/restore exercises, hosted restart checks and broader reorganization testing would strengthen operational evidence. Any real strategy, transferable token or additional asset requires a separate financial specification and security review.
 
 \section{Conclusion}
+MicroInvest now combines independently created named contracts, keyword discovery and project-specific participation with the original exact-share/principal-exit rules. Creator-authorized registration and PostgreSQL retain the directory; confirmed activity is indexed while entitlements remain on-chain. Local tests cover accounting, authorization and isolation, and the updated Render APIs demonstrate live metadata and recovered history. The system meets the coursework's financial DApp learning objectives within its stated educational scope.
 
-MicroInvest implements the selected micro-investment workflow through exact fractional shares, wallet-authorized transactions and caller-bound principal exit. Flask provides real contract queries and event history, while MetaMask signs writes. Automated tests cover accounting and failure cases, and the deployed Sepolia/Render integration supports the demonstrated lifecycle. The result meets the financial DApp learning objectives within a clearly stated educational scope.
-
-\FloatBarrier
-\begin{thebibliography}{9}
-\small
-\setlength{\itemsep}{2pt}
-\bibitem{assignment} SC6113 Individual Assignment Financial Decentralized Application.
-Supplied coursework Word document, Sections III and VI--XI.
-\bibitem{solidity} Solidity 0.8.30. \emph{Security Considerations}.
-\url{https://docs.soliditylang.org/en/v0.8.30/security-considerations.html}.
-\bibitem{provider} Ethereum Improvement Proposals. \emph{EIP-1193 Ethereum Provider JavaScript API}.
-\url{https://eips.ethereum.org/EIPS/eip-1193}.
-\bibitem{permissions} Ethereum Improvement Proposals. \emph{EIP-2255 Wallet Permissions System}.
-\url{https://eips.ethereum.org/EIPS/eip-2255}.
-\bibitem{flask} Flask 3.1 documentation. \emph{Deploying to Production}.
-\url{https://flask.palletsprojects.com/en/stable/deploying/}.
-\bibitem{render} Render documentation. \emph{Deploy a Flask App}.
-\url{https://render.com/docs/deploy-flask}.
-Online documentation accessed 7 October 2026.
+\begin{thebibliography}{9}\small
+\setlength{\itemsep}{1pt}
+\bibitem{assignment} SC6113 Individual Assignment: Financial Decentralized Application. Supplied Word document, Sections III and VI--XI.
+\bibitem{solidity} Solidity 0.8.30. \emph{Security Considerations}. \url{https://docs.soliditylang.org/en/v0.8.30/security-considerations.html}.
+\bibitem{signature} Ethereum Improvement Proposals. \emph{ERC-191: Signed Data Standard}. \url{https://eips.ethereum.org/EIPS/eip-191}.
+\bibitem{provider} Ethereum Improvement Proposals. \emph{EIP-1193: Ethereum Provider JavaScript API}. \url{https://eips.ethereum.org/EIPS/eip-1193}.
+\bibitem{render} Render. \emph{Deploy a Flask App; Deploy for Free}. \url{https://render.com/docs/deploy-flask}; \url{https://render.com/docs/free}.
+\bibitem{sqlalchemy} SQLAlchemy 2.0. \emph{Table Configuration; PostgreSQL dialect}. \url{https://docs.sqlalchemy.org/en/20/core/metadata.html}; \url{https://docs.sqlalchemy.org/en/20/dialects/postgresql.html}.
 \end{thebibliography}
 \end{document}

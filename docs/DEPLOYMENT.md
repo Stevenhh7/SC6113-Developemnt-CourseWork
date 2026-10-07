@@ -1,6 +1,6 @@
 # Sepolia deployment evidence
 
-**Version 1 evidence.** This page records the original single-pool deployment and acceptance. Its contract is retained and imported by the multi-investment update. Updated PostgreSQL/Render deployment and new MetaMask acceptance are still pending; see [the update guide](RENDER_UPDATE.md).
+**Original deployment evidence.** This page retains the original single-pool receipts and acceptance. Its unchanged contract is imported by the multi-investment update. The student has since redeployed and accepted the database-history version; current public checks are recorded in [updated evidence](evidence/live-multi-investment-2026-10-07.json) and [the update guide](RENDER_UPDATE.md).
 
 The student deployed this pool through MetaMask using the project's wallet setup page. On 2026-10-06, the public Sepolia JSON-RPC endpoint independently returned chain ID 11155111, runtime bytecode matching `contract/MicroInvest.json`, and a successful creation receipt in the supplied deployment block. This was a read-only verification; no additional transaction was submitted by the verification process.
 

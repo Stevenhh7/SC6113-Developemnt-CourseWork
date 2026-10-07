@@ -16,6 +16,9 @@ test-results/
 .DS_Store
 pytest-cache-files-*/
 tmp/pdfs/
+tmp/submission-inputs/
+tmp/submission-previous-guides/
+tmp/submission-qa/
 report/*.aux
 report/*.log
 report/*.out

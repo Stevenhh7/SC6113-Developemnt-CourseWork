@@ -4,7 +4,7 @@
 
 The multi-investment update passed **54 backend cases, 9 frontend amount/history tests and 24 browser integration checks** on Windows with Python 3.12, Node.js 24.19.0 and the pinned Solidity 0.8.30/Hardhat 3.18.1 artifact. Browser integration uses installed Edge, a real local chain, real Flask/Web3.py and an automated EIP-1193 wallet simulation.
 
-The PostgreSQL integration case was **skipped locally** because no disposable PostgreSQL server was configured. CI now provisions PostgreSQL 16 and TEST_DATABASE_URL. This is planned CI validation, not an observed passing PostgreSQL or Render run. The unchanged business contract's previous 12-test result remains from 6 October 2026.
+The PostgreSQL integration case was **skipped locally** because no disposable PostgreSQL server was configured. CI now provisions PostgreSQL 16 and TEST_DATABASE_URL. This is planned dedicated CI validation, not an observed passing PostgreSQL integration test. Updated student acceptance and independent public Render checks are recorded separately below. The unchanged business contract's previous 12-test result remains from 6 October 2026.
 
 | Suite | Observed result | Source |
 | --- | --- | --- |
@@ -54,7 +54,7 @@ All 24 recorded checks are preserved in the evidence JSON. The complete local fl
 - Database-backed names/IDs/addresses surviving a Flask restart, and chain-backed positions/history recovery.
 - Explicit RPC outage errors, disabled writes and no uncaught browser script exceptions.
 
-Local testing cannot verify MetaMask extension permission/popup behavior, Sepolia delays or the hosted PostgreSQL connection. Follow docs/RENDER_UPDATE.md for new live acceptance.
+Local testing cannot verify MetaMask extension permission/popup behavior, Sepolia delays or the hosted PostgreSQL connection. Student acceptance and current hosted read-only checks are recorded below; docs/RENDER_UPDATE.md retains the live acceptance procedure.
 
 ## Contract invariants and earlier gas evidence
 
@@ -70,10 +70,14 @@ The UI explains Sepolia, fixed shares, no returns/platform fee and separate gas.
 
 Security boundaries include caller-owned redemption, guarded transfers, exact amounts, explicit wallet signer, deployer-authorized metadata, confirmed creation verification, selected contract/account scope, escaped text, parameterized search and sanitized errors. Project explanations are creator-supplied. Public addresses/activity are public data. One confirmation is not finality; commercial audit/moderation/real-money operation remain outside scope.
 
-## Original live acceptance and new acceptance pending
+## Original and updated live acceptance
 
-The student previously reported successful actual MetaMask tests on the original Render site on 7 October 2026. Separate read-only hosted API and Sepolia receipt checks are retained in docs/evidence/live-validation-2026-10-07.json. Seven original student screenshots support that version's report.
+The student reported successful actual MetaMask tests on the original Render site on 7 October 2026. Separate hosted API and original Sepolia receipt checks remain in `docs/evidence/live-validation-2026-10-07.json`; seven original student screenshots are retained with provenance.
 
-The student has now deployed the multi-investment version; public directory and pool APIs were checked. The subsequent history-index code has not yet been deployed, so its hosted synchronization still needs acceptance. Updated acceptance must cover two creators, independent IDs/contracts, title/description search, another user's participation, isolated redemption/history and catalog persistence across Render redeploy. Updated live screenshots and the report revision remain student follow-up actions.
+The student subsequently redeployed the history-index version and confirmed updated testing succeeded. Independent read-only checks in `docs/evidence/live-multi-investment-2026-10-07.json` recorded nine HTTP 200 responses: process liveness, directory, keyword search, project detail API, two scoped pool reads, five-event/complete history and the updated browser module. The directory contains ID 1 (original pool) and ID 2 (`test1`) with distinct addresses. Both observed entries were created by the same wallet; the two-creator claim remains local browser evidence.
 
-The missing-history symptom was reproduced on the current hosted API: the newest range 11858330–11863329 had no matching events, while the next cursor page returned the original 0.04 ETH redemption in block 11857372 with hash 0xb5fc592ccafcfbc8a5724b5384df947e7083c11028f2d01aadaa6d50962bafec. A subsequent local synchronization of actual Sepolia data stored all ten original pool events in SQLite and returned the latest five from the database. This proves local event recovery, not deployment of the new history index on Render.
+The current original-pool history returns `source: database`, the latest five records and ten records in the larger request. The confirmed 0.04 ETH redemption in block 11857372, hash `0xb5fc592ccafcfbc8a5724b5384df947e7083c11028f2d01aadaa6d50962bafec`, has been recovered. Earlier empty recent-block ranges did not mean the on-chain transaction was deleted. The new preview/full-history UI traverses empty ranges and uses the persistent event/range index.
+
+During the update, a dashboard Live status for b6941a7 initially differed from the files served publicly. After the student cleared the build cache and redeployed, the public browser module matched that commit and the database history endpoint worked. The specific hosting cause was not established; liveness alone was not used as application readiness evidence.
+
+Current public-site screenshots and the student's updated Render image are included in the revised eight-page report. Its creation-form capture was illustrative and submitted no deployment. The collector made no wallet requests, direct database connection, load test or hosted stop/restart experiment. Dedicated PostgreSQL integration remains skipped locally; no successful CI execution is invented. The final application-data export was subsequently obtained over a read-only PostgreSQL/TLS connection on 8 October 2026: 2 projects, 10 stored events and 9 scan ranges (docs/evidence/database-export-2026-10-08.json). This export success is separate from the dedicated PostgreSQL test suite and hosted restart validation.

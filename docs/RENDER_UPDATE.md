@@ -2,7 +2,7 @@
 
 This update changes the home page from one pool to a searchable directory. Keep the existing Python service and original Sepolia contract. New contracts are created by users' MetaMask wallets and registered in PostgreSQL; no contract factory or backend signing key is needed.
 
-The implementation and local tests are complete. The student has deployed the multi-investment version; public directory/pool APIs were checked. The subsequent history-index update still needs source push/redeploy. This host has not connected directly to your live PostgreSQL database.
+The student has redeployed the history-index version and reported successful updated testing on 7 October 2026. Independent public checks verified two projects, keyword search, both pool reads, updated browser code and database-backed history. The eight-page report is revised; no additional screenshot is required. A read-only TLS connection exported the final PostgreSQL application data on 8 October 2026; see docs/evidence/database-export-2026-10-08.json. No independent hosted restart experiment is claimed. The steps below remain a reference for recreating/updating the deployment.
 
 ## 1. Create PostgreSQL
 
@@ -73,16 +73,12 @@ Using Sepolia and your chosen small test amounts:
 
 No one can withdraw other participants' money. Titles/explanations do not change the fixed 1:1 principal accounting or promise returns.
 
-## 5. New report evidence
+## 5. Updated report evidence (complete)
 
-The existing 8-page report and seven screenshots describe version 1 (single pool, no database). After the new live checks, supply screenshots of:
+The revised eight-page report (including references) covers all 13 required sections, the multi-contract architecture, signed registration, PostgreSQL metadata/event indexing and current tests. Current public-site captures show the keyword filter/matching project, title/explanation form, independent detail and recovered activity. The student supplied updated Render status for b6941a7. No additional screenshot is required for this revision.
 
-- Explore with a keyword search and at least two separate project results.
-- New creation success showing title, investment ID, contract address and deployment transaction.
-- A project's detail page showing its name/description, contract, nonzero personal position and confirmed deposit.
-- Confirmed redemption and that project's activity; another project's remaining position if demonstrating isolation.
-- Render deployment success and the hosted project/catalog API response.
+Earlier wallet, invalid-input, deployment and redemption captures remain valid unchanged-contract evidence and have explicit captions. The API illustration is labelled an excerpt rather than a screenshot. The complete updated read-only record is `docs/evidence/live-multi-investment-2026-10-07.json`. It verifies five recent and ten complete original-pool events with `source: database`, two contract addresses and the updated browser module.
 
-Do not include DATABASE_URL/RPC credentials. Existing wallet/invalid-input screenshots can remain as historical evidence if the revised captions identify the version. The PDF needs an updated architecture/database description and current test evidence.
+The observed public projects share one creator; two-creator isolation is demonstrated by the local simulated-wallet suite. Dedicated PostgreSQL/hosted stop-restart tests are not independently recorded as passes.
 
 For the database part of source submission, include docs/schema.sql and a reviewed public metadata export from scripts/export-catalog.py --include-history. Running that script locally with blank DATABASE_URL exports only the local catalog; use the final PostgreSQL connection to collect the hosted rows. Render's internal URL is for hosted connections; local access uses its external URL/settings. The export is public metadata, not a full backup.

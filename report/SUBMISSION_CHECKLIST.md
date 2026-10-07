@@ -1,35 +1,39 @@
 # 新版最终提交检查
 
-原作业要求 5–8 页 PDF、源码、README、截图，以及采用数据库时的数据库相关内容；不需要视频。
+原作业要求 5-8 页 PDF、源码、README、截图，以及采用数据库时的数据库相关内容；不需要视频。
 
-## 多 Investment 版本的当前状态
+## 已完成
 
-- [x] 用户创建独立合约、填写名称/说明、部署者签名登记。
-- [x] 项目目录、名称/说明关键词搜索、编号/地址区分与创建者筛选。
-- [x] 独立详情页、账户菜单、投入/持仓/部分及全部赎回、独立分页历史。
-- [x] PostgreSQL 支持、本地 SQLite、数据库结构与公开目录导出脚本。
-- [x] 54 项后端测试、9 项金额/历史前端测试、24 项本地浏览器检查通过。
-- [x] PostgreSQL 专项测试加入 CI；本机无数据库而跳过，不能标为已通过。
-- [x] 用户已部署多 Investment；公开目录和资金池接口已检查。
-- [ ] 推送本次历史入库改动并重新部署，核对数据库同步与重启恢复。
-- [ ] 新版真实 MetaMask/Sepolia 验收：两创建者、搜索、跨项目参与与资金隔离、重启恢复。
-- [ ] 提供新版创建/搜索/详情/交易/Render/API 截图，详见 ../USER_ACTIONS.md。
-- [ ] 修订报告的架构、数据库、应用设计、实现、测试、限制与结论，编译检查 5–8 页 PDF。
-- [ ] 从最终数据库导出并核对公开目录数据，提交 docs/schema.sql 与相关资料；不包含连接密码。
-- [ ] 按课程通知确认最终命名、提交入口和截止时间，提交全部材料。
+- [x] 用户创建独立合约、名称/说明、部署者签名登记与登记重试。
+- [x] 目录、名称/说明关键词搜索、ID/地址区分和创建者筛选。
+- [x] 独立详情、账户菜单、投入/持仓/部分及全部赎回、独立分页历史。
+- [x] PostgreSQL 元数据/确认历史存储、本地 SQLite、结构和公开导出工具。
+- [x] 54 后端、9 前端、24 本地浏览器检查通过，12 项未修改合约测试保留。
+- [x] PostgreSQL 专项测试加入 CI；本机跳过，报告未称其已通过。
+- [x] 用户已重新部署历史索引版本并确认测试成功。
+- [x] 独立公开核验两个合约、搜索、资金池、更新浏览器模块及数据库历史。
+- [x] 新版报告更新为 8 页（含参考文献），全部 13 节、九个截图来源。
+- [x] LaTeX 两次编译、引用及八页排版核对，更新可编译源码 ZIP。
+- [x] 新旧截图来源区分，完整原图及公开核验记录保留。
+- [x] 2026-10-08 已只读导出并核对最终 PostgreSQL 数据：2 项目、10 确认事件、9 同步范围；JSON、SQL、结构已加入提交 ZIP。
 
-## 保留的第一版报告
+线上核验记录见 `../docs/evidence/live-multi-investment-2026-10-07.json`。两个公开项目目前由同一账户创建；两创建者/跨项目隔离证据来自本地模拟钱包测试。托管服务专门停启实验、PostgreSQL 专项测试和商业安全审计没有独立完成记录，报告没有把它们写成成功。
 
-已有 MicroInvest_Report.tex、8 页 MicroInvest_Report.pdf、MicroInvest_LaTeX.zip 和七张原图是第一版单资金池、无数据库的报告，作者 Ji Chengyu、G2608005K。原有 Sepolia 部署、Render 验收、真实交易/Gas 和截图均保留，不冒充新版证据。它们需要修订后才能描述当前实现。
+## 提交前由学生完成
+
+- [ ] 按课程通知确认命名、提交入口和截止时间，提交所有材料。
+- [ ] 如需把最终报告放入 GitHub，检查本次报告/文档改动后自行提交推送。
+
+最终 PDF、LaTeX 和 ZIP 已修订为当前多 Investment 版本，无需额外截图。原有真实部署、交易/Gas 和未使用的旧截图仍作为历史资料保留。
 
 ## 报告章节
 
-仍需保留全部 13 个部分：Introduction、Problem Statement、Objectives、System Architecture、Technologies Used、Smart Contract Design、Application Design、Implementation、Testing and Results、Challenges Encountered、Limitations、Future Improvements、Conclusion。
+Introduction、Problem Statement、Objectives、System Architecture、Technologies Used、Smart Contract Design、Application Design、Implementation、Testing and Results、Challenges Encountered、Limitations、Future Improvements、Conclusion。
 
-安全性是 Word 明确要求。说明已有调用者权限、输入/签名/字节码校验、重入和转账失败测试、私钥边界、Gas 和公开数据隐私，区分已运行测试与尚未运行的 PostgreSQL/新版线上验收。不要声称商业审计、压力测试或新手参与者研究。
+Word 明确要求的安全性、可用性和性能已有按实际范围的分析：调用者权限、输入/签名/字节码校验、重入/转账失败测试、私钥边界、Gas 和公开数据隐私。没有声称性能压力测试或新手用户研究。
 
-## 打包
+## 打包范围
 
-提交业务合约、artifact、Flask 与目录模块、前端、测试、脚本、依赖/锁文件、render.yaml、README、数据库结构/相关数据、公开部署信息、真实截图及修订 PDF。排除 .env、数据库/RPC 密码、私钥、助记词、instance/、.venv/、node_modules/、本地链缓存和 LaTeX 临时文件。
+提交业务合约、artifact、Flask 与数据库模块、前端、测试、脚本、依赖/锁文件、render.yaml、README、数据库结构/相关数据、公开部署信息、真实截图及修订 PDF。排除 `.env`、数据库/RPC 密码、私钥/助记词、`instance/`、`.venv/`、`node_modules/`、本地链缓存和 LaTeX 临时文件。
 
-完整新版上线与截图操作见 ../USER_ACTIONS.md 和 ../docs/RENDER_UPDATE.md。
+LaTeX ZIP 是报告源码包，不等同于完整应用提交包。完整项目与数据库资料的交付流程见 `../USER_ACTIONS.md`。

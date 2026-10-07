@@ -1,0 +1,25 @@
+{
+  "exportedAtUtc": "2026-10-07T16:22:23.362745+00:00",
+  "timezone": "Asia/Shanghai",
+  "source": "Direct final Render PostgreSQL application tables",
+  "transport": "TLS required",
+  "databaseSession": "Read-only enforced with default_transaction_read_only=on",
+  "chainId": 11155111,
+  "counts": {
+    "investments": 2,
+    "confirmedEvents": 10,
+    "historyRanges": 9
+  },
+  "validation": {
+    "verifiedPublicContractsPresent": true,
+    "eventIdentityUnique": true,
+    "checkpointIdentityUnique": true,
+    "eventAmountsAndHashesValid": true,
+    "credentialsAbsent": true
+  },
+  "exportFile": "database/catalog-postgres-export.json",
+  "sha256": "dcf19b3911bbf4c0e9360bc65551987e3044e2afda8551b663805f8cbf06c2c9",
+  "scope": "All stored Sepolia project metadata, confirmed event-index rows and synchronization ranges. Does not export server roles/credentials or claim that every on-chain event has already been indexed.",
+  "doesNotClaim": "Dedicated PostgreSQL test-suite pass, hosted restart experiment, or full PostgreSQL server backup",
+  "reviewedAtUtc": "2026-10-07T16:26:35.326319+00:00"
+}

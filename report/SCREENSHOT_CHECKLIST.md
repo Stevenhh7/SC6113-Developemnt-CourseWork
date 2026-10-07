@@ -1,45 +1,43 @@
-# 报告截图清单
+# 新版报告截图记录
 
-**以下为第一版已收齐的截图记录。** 新版已增加多 Investment、搜索与 PostgreSQL，需要新截图，旧图不能单独证明新版上线。新拍摄清单见 [USER_ACTIONS.md](../USER_ACTIONS.md) 第 4 部分；旧图原样保留，更新报告时区分版本。
+作者：Ji Chengyu，G2608005K。报告已更新为 **8 页（含参考文献）**，保留全部 13 个规定章节。目前证据足够，无需再补截图。
 
-作者：Ji Chengyu，G2608005K。请优先在已测试通过的 [Render 网站](https://sc6113-developemnt-coursework.onrender.com/) 截图，使用 Sepolia。
+Word 的 Testing 部分要求合约部署、钱包连接、成功交易、非法输入及结果截图。更新报告沿用未修改业务合约的真实交易证据，并增加新版公开网站的创建表单、搜索、详情和恢复历史，不把旧图冒充新版页面。
 
-原 Word 的 VIII Testing 明确要求成功交易、非法输入、钱包连接、合约部署以及结果截图。计划还要求持仓、赎回、历史和后端集成的证据。目前共七张原图已收齐，全部加入 LaTeX；第 3 张同时覆盖成功交易与完整历史，无需额外第 5 张。
-
-| 编号及建议文件名 | 拍什么 | 必须能读清的内容 |
+| 图片 | 内容 | 新版 PDF |
 | --- | --- | --- |
-| 1 `01-deployment.png` | 已有合约的 Etherscan 创建交易，或保留的 Deployment confirmed 页面 | Sepolia、成功状态、合约地址/创建交易和部署区块。无需重新部署。 |
-| 2 `02-wallet.png` | 连接后的首页，打开钱包账户菜单 | 地址、Sepolia、已授权账户及当前选择；同时显示个人持仓区域更好。 |
-| 3 `03-history.png` | 已收到完整交易历史，兼作成功交易证据 | Confirmed、金额、交易哈希，以及投入和赎回记录。 |
-| 4 `04-invalid-input.png` | 已收到输入 `-1` 后的 Deposit 校验提示 | 负数输入与要求正数金额的提示同屏。该校验不会提交交易。 |
-| 5 完整历史 | 已由第 3 张覆盖，无需重复提供 | Deposit/Redemption、金额、日期、Confirmed、交易链接。 |
-| 6 `06-redemption.png` | 已收到赎回后的零持仓与成功反馈 | 区块 11857372、Confirmed、零份额、可赎回本金 0 ETH。 |
-| 7 `07-backend.png` | 已收到 `/api/pool` JSON | 区块 11857366、本金与合约余额 0.04 ETH、零额外余额、`solvent: true`。图片未包含地址栏；公开端点另有独立 HTTPS 核验记录。 |
-| 8 `08-render.png` | 已收到 Render 成功部署日志 | Deploy succeeded / Live、commit b65f9c3、Gunicorn 启动及公开域名。 |
+| 01-deployment.png | 原合约部署成功，Sepolia、地址、区块 11856501 | 已采用清晰裁切，说明业务合约规则未变 |
+| 02-wallet.png | Sepolia 钱包及两个已授权账户 | 已采用，说明账户功能沿用 |
+| 03-history.png | 早期投入/赎回 Confirmed 完整历史 | 保留原图，正文使用当前历史 |
+| 04-invalid-input.png | -1 ETH 与正数金额提示 | 已采用输入/错误提示裁切 |
+| 06-redemption.png | 区块 11857372 赎回确认、零个人持仓 | 已采用；当前索引已找回同一交易 |
+| 07-backend.png | 较早区块 11857366、本金 0.04 ETH | 保留原图，正文改用当前 API 核验摘要 |
+| 08-render.png | 旧 commit b65f9c3 部署成功 | 保留原图，不作为新版本证据 |
+| 09-directory-search.jpg | 当前 Render 搜索 test1 及对应项目结果 | 已采用，同一截图的两个局部 |
+| 10-create-form.jpg | 当前 Render 名称/说明表单 | 已采用；示例填写，未提交部署 |
+| 11-project-detail.jpg | 当前 ID 2 的名称、说明、合约及创建者 | 已采用 |
+| 12-current-history.jpg | 当前原项目历史的已确认记录 | 已采用；截图仅截取前三行方便阅读 |
+| 13-render-updated.png | 用户提供的 b6941a7、Deploy succeeded / Live | 原图保留，PDF 用 13-render-status.png 裁切状态和 source |
 
-截图收集已完成，无需继续提供。七张均保留原始 PNG 字节，尺寸和 SHA-256 见 `screenshots/manifest.json`。编译后检查缩放后的截图文字是否可读；原图一并作为独立提交材料。
+上述新版网站截图为真实公开页面。完整 API JSON 另存 `docs/evidence/live-multi-investment-2026-10-07.json`；报告中的 API 摘要明确注明不是浏览器截图。当前独立读取确认五条预览、十条原池完整事件和 `source: database`。Render 状态图片与清除构建缓存后的独立服务核验分别说明。
 
-若现有成功交易可以在历史/Etherscan 中展示，无需重新签名。已有部署可从下面的创建交易打开，不要点击 Deploy 再创建一个资金池。持仓截图若需要复现，可由你按自己的测试余额选择再走一次小额投入、部分赎回、全部退出。
+所有原图保留，原始尺寸、SHA-256、用途和裁切信息见 `screenshots/manifest.json`。正文含九个截图来源，另有架构图和 API 摘要；不是要求用户重新签名或重新部署来拍照。
 
-## 可直接打开的证据页面
+## 已收齐
 
-- [网站首页](https://sc6113-developemnt-coursework.onrender.com/)
-- [完整历史](https://sc6113-developemnt-coursework.onrender.com/activity?wallet=0xc63A507a39C37CB4C752BA56408138386D06146f)
-- [资金池 API](https://sc6113-developemnt-coursework.onrender.com/api/pool)
-- [合约创建交易](https://sepolia.etherscan.io/tx/0x45dba804763f4d53c4da30957b3d4da0f02dd15eecb65762a904926f99efd2ea)
-- [已确认投入 0.003 ETH](https://sepolia.etherscan.io/tx/0x0304792edcd32dc589e6e5c7756f86fdc33a283c295b78772a8e323b4d490798)
-- [已确认部分赎回 0.001 ETH](https://sepolia.etherscan.io/tx/0xcb3ebbe7044daf65d6129d01cb936cfaa9ccc8553b347ebccbe13a09b477804e)
-- [已确认全部退出 0.002 ETH](https://sepolia.etherscan.io/tx/0xe47ab65933833624b02fddd362fcce5ade0c734d1626790b3239831ff4f06e9a)
+- [x] 必需部署、钱包、成功交易、非法输入证据。
+- [x] 赎回后持仓与交易确认。
+- [x] 新版创建表单、关键词搜索、独立详情与数据库恢复历史。
+- [x] 新版 Render Live 状态及公开 API 核验记录。
+- [x] 八页最终 PDF 的截图和图注逐页检查。
 
-原图已整理进 `report/screenshots/`，`MicroInvest_Report.tex` 的图注已按实际内容核对。API 图早于零持仓图 6 个区块，报告已说明状态变化。按你后续要求，已编译最终英文 PDF 为 8 页并逐页核对。
+## 证据页面
 
-## 接收进度
+- [新版目录](https://sc6113-developemnt-coursework.onrender.com/)
+- [test1 独立详情](https://sc6113-developemnt-coursework.onrender.com/investments/2)
+- [原项目完整历史](https://sc6113-developemnt-coursework.onrender.com/investments/1/activity?wallet=0xc63A507a39C37CB4C752BA56408138386D06146f)
+- [新版目录 API](https://sc6113-developemnt-coursework.onrender.com/api/investments)
+- [原项目历史 API](https://sc6113-developemnt-coursework.onrender.com/api/history/0xc63A507a39C37CB4C752BA56408138386D06146f?investment=1&limit=5)
+- [test1 创建交易](https://sepolia.etherscan.io/tx/0x5f3b67afb977a0e2c4e53738b14266a406df702a4b700f78bebf0664e1e11a0a)
 
-- [x] 1 部署成功，已保存原图并核对链 ID、合约地址和区块。
-- [x] 2 钱包连接，显示 Sepolia 与两个已授权账户。
-- [x] 3 成功交易与完整历史，原图保存为 `03-history.png`，包含 Confirmed 的投入/赎回记录。
-- [x] 4 非法输入，原图展示 `-1` 和正数金额校验消息。
-- [x] 5 完整历史，已由第 3 张覆盖，无需重复提供。
-- [x] 6 全部赎回后的零持仓与交易确认。
-- [x] 7 后端 API，正本金的较早快照。
-- [x] 8 Render 服务 Live、成功部署日志与公开域名。
+真实双创建者和托管服务停启恢复没有独立新增截图；报告如实把双创建者隔离列为本地浏览器结果，不将其说成已独立复现的线上结果。若课程另要求现场演示，可按 `USER_ACTIONS.md` 的验收流程展示。

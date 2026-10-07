@@ -8,7 +8,24 @@
       "sha256": "260bbb046c20db59c967dcb7f5fac27b3346eea76e0d948833253b6f993c63e0",
       "caption": "Deployment confirmation showing Sepolia chain ID 11155111, the deployed contract address and block 11856501.",
       "receivedDate": "2026-10-07",
-      "source": "Student supplied original screenshot"
+      "source": "Student supplied original screenshot",
+      "includedInPdf": true,
+      "reportAsset": "01-deployment-crop.png",
+      "derivatives": [
+        {
+          "file": "01-deployment-crop.png",
+          "width": 1385,
+          "height": 325,
+          "sha256": "30ac79c00fd42745c51ec40980aafa091023063270839e58866aa08c23a60877",
+          "operation": "Faithful crop for report readability; original pixels preserved",
+          "cropPixels": [
+            95,
+            70,
+            1480,
+            395
+          ]
+        }
+      ]
     },
     {
       "number": 2,
@@ -18,7 +35,9 @@
       "sha256": "d868174cdf947a18ccaa83f5fc6ccd7b64b367bfc820882743ac2a4ab8f9c2f0",
       "caption": "Connected MetaMask account on Sepolia with a second authorized account available in the account menu.",
       "receivedDate": "2026-10-07",
-      "source": "Student supplied original screenshot"
+      "source": "Student supplied original screenshot",
+      "includedInPdf": true,
+      "reportAsset": "02-wallet.png"
     },
     {
       "number": 3,
@@ -28,7 +47,8 @@
       "sha256": "998add5ca88a8725fde41858ec6a9c307ee42effaad56d117977c76e1385bcd9",
       "caption": "Complete activity page showing confirmed deposits and redemptions, including the 0.003 ETH deposit, 0.001 ETH partial redemption and 0.002 ETH full exit.",
       "receivedDate": "2026-10-07",
-      "source": "Student supplied original screenshot"
+      "source": "Student supplied original screenshot",
+      "includedInPdf": false
     },
     {
       "number": 4,
@@ -38,7 +58,24 @@
       "sha256": "8bfc514b10344ea5f6f3b3572df8f5f7e5ed3c2c701b7e01eceb87f7cb7f735d",
       "caption": "A negative deposit amount of -1 ETH with a message requiring a positive ETH amount.",
       "receivedDate": "2026-10-07",
-      "source": "Student supplied original screenshot"
+      "source": "Student supplied original screenshot",
+      "includedInPdf": true,
+      "reportAsset": "04-invalid-input-crop.png",
+      "derivatives": [
+        {
+          "file": "04-invalid-input-crop.png",
+          "width": 840,
+          "height": 395,
+          "sha256": "8345c9b3d8aaee72cf8612eb2579ff6393f8cd1e9788fcd454ed4975948464d2",
+          "operation": "Faithful crop for report readability; original pixels preserved",
+          "cropPixels": [
+            40,
+            260,
+            880,
+            655
+          ]
+        }
+      ]
     },
     {
       "number": 6,
@@ -48,7 +85,9 @@
       "sha256": "e4948d8d59027b7b96b12b677a9d2f84b9b06980019fe47982b7a3a2d21d46db",
       "caption": "Confirmed redemption at block 11857372 with zero personal shares and zero redeemable principal.",
       "receivedDate": "2026-10-07",
-      "source": "Student supplied original screenshot"
+      "source": "Student supplied original screenshot",
+      "includedInPdf": true,
+      "reportAsset": "06-redemption.png"
     },
     {
       "number": 7,
@@ -58,7 +97,8 @@
       "sha256": "b6fbdf138b2f17b8d9d8313b7cd56601a8d1b6618ab72ceabcec28613c259e24",
       "caption": "Pool API at block 11857366: 0.04 ETH principal and contract balance, zero excess and solvent true, before the later redemption.",
       "receivedDate": "2026-10-07",
-      "source": "Student supplied original screenshot"
+      "source": "Student supplied original screenshot",
+      "includedInPdf": false
     },
     {
       "number": 8,
@@ -68,7 +108,90 @@
       "sha256": "9a75e0e5c0177ec16f36d37ff550f69bb8281a51fbbd5fef43ca13eab0be905c",
       "caption": "Render deployment succeeded and Live for commit b65f9c3, with Gunicorn startup logs and the public service URL.",
       "receivedDate": "2026-10-07",
-      "source": "Student supplied original screenshot"
+      "source": "Student supplied original screenshot",
+      "includedInPdf": false
+    },
+    {
+      "number": 9,
+      "file": "09-directory-search.jpg",
+      "width": 1195,
+      "height": 605,
+      "sha256": "f56f30579890dff4ffec6c3fd90061e63b85c3d37ceab96df83ae618b68c3fcc",
+      "caption": "Current keyword filter test1 and matching Investment #2; the report uses two crops from this unchanged capture.",
+      "receivedDate": "2026-10-07",
+      "source": "Independent browser capture of the current public Render application",
+      "includedInPdf": true,
+      "reportAsset": "09-directory-search.jpg",
+      "url": "https://sc6113-developemnt-coursework.onrender.com/?q=test1"
+    },
+    {
+      "number": 10,
+      "file": "10-create-form.jpg",
+      "width": 747,
+      "height": 440,
+      "sha256": "11c1eb2852d767839f4adeab23c0b2d33312f31754ec5be81b56eebadead8b5c",
+      "caption": "Current title and explanation fields with an illustrative draft. No deployment was submitted.",
+      "receivedDate": "2026-10-07",
+      "source": "Independent browser capture of the current public Render application",
+      "includedInPdf": true,
+      "reportAsset": "10-create-form.jpg",
+      "url": "https://sc6113-developemnt-coursework.onrender.com/deploy"
+    },
+    {
+      "number": 11,
+      "file": "11-project-detail.jpg",
+      "width": 865,
+      "height": 255,
+      "sha256": "0ab2c5c699c24e14c00491acb6b092a90026bc9b52a4843f4ce9843cde3aac00",
+      "caption": "Current independent Investment #2 test1 title, explanation, address and creator.",
+      "receivedDate": "2026-10-07",
+      "source": "Independent browser capture of the current public Render application",
+      "includedInPdf": true,
+      "reportAsset": "11-project-detail.jpg",
+      "url": "https://sc6113-developemnt-coursework.onrender.com/investments/2"
+    },
+    {
+      "number": 12,
+      "file": "12-current-history.jpg",
+      "width": 1195,
+      "height": 324,
+      "sha256": "1946c3c24735b3938f3d72d8254a500b1893e9a29ca59ac07242127bc2e62482",
+      "caption": "Current original-pool activity showing three newest confirmed records; ten total events were independently verified.",
+      "receivedDate": "2026-10-07",
+      "source": "Independent browser capture of the current public Render application",
+      "includedInPdf": true,
+      "reportAsset": "12-current-history.jpg",
+      "url": "https://sc6113-developemnt-coursework.onrender.com/investments/1/activity?wallet=0xc63A507a39C37CB4C752BA56408138386D06146f"
+    },
+    {
+      "number": 13,
+      "file": "13-render-updated.png",
+      "width": 1445,
+      "height": 1083,
+      "sha256": "93de33629ae81bca51ecbb114b782080d60b090ec0e9533e5a947c95c711e5e6",
+      "caption": "Student-supplied updated Render deployment showing Deploy succeeded / Live and source b6941a7.",
+      "receivedDate": "2026-10-07",
+      "source": "Student supplied original screenshot",
+      "includedInPdf": true,
+      "reportAsset": "13-render-status.png",
+      "derivatives": [
+        {
+          "file": "13-render-status.png",
+          "width": 660,
+          "height": 325,
+          "sha256": "8e4f900c0726952f0a9c0932340282539589eb4ea4eed49c762aab3b270ab1e4",
+          "operation": "Faithful crop for report layout; original pixels preserved",
+          "cropPixels": [
+            35,
+            25,
+            695,
+            350
+          ]
+        }
+      ]
     }
-  ]
+  ],
+  "reportRevision": "Multi-Investment update, 2026-10-07",
+  "originalCaptureCount": 12,
+  "capturesUsedInPdf": 9
 }

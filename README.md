@@ -10,7 +10,7 @@ The multi-investment version adds wallet deployment and signed registration, a s
 
 The local update passed 54 backend cases, 9 frontend amount/history tests and 24 browser integration checks on 7 October 2026. The unchanged business contract previously passed 12 contract tests. Browser checks use a real local chain and a simulated wallet. A PostgreSQL integration check is configured in CI; it was not run locally because this host has no PostgreSQL server. See [testing](docs/TESTING.md).
 
-The original [deployment evidence](docs/DEPLOYMENT.md) describes version 1. The existing [Render site](https://sc6113-developemnt-coursework.onrender.com/) now serves the multi-investment directory. **The student has deployed the multi-investment version, and public directory/pool APIs were checked. The later history-index update needs source push/redeployment and updated acceptance.** The existing report PDF/LaTeX/screenshots are also version 1 evidence and need revision after updated live acceptance.
+The original [deployment evidence](docs/DEPLOYMENT.md) retains valid receipts from the unchanged contract. The [Render site](https://sc6113-developemnt-coursework.onrender.com/) now serves the updated multi-investment directory and persistent history. **The student redeployed the history-index version and reported successful updated testing on 7 October 2026.** Independent public checks verified two contracts, keyword search, pool reads, updated browser code and database-backed history; see [updated live evidence](docs/evidence/live-multi-investment-2026-10-07.json). The revised [report](report/README.md) has eight pages including references, all 13 required sections and current screenshots. Dedicated PostgreSQL integration and hosted stop/restart tests are not claimed as independently passed.
 
 ## Technology
 
@@ -138,7 +138,7 @@ The SQL schema is [docs/schema.sql](docs/schema.sql). To export public project r
 
 Run against the final database (Render Shell if available, or a local connection using Render's external URL) and review the exported rows. The export contains public project metadata, indexed transaction events and scan checkpoints, with no credentials; it is not a full PostgreSQL backup/restore utility. Do not submit the SQLite test/demo directories or database connection strings.
 
-See [Plan.md](Plan.md), [architecture](docs/ARCHITECTURE.md), [testing](docs/TESTING.md) and [student actions](USER_ACTIONS.md). Revise the version 1 report/screenshots after new live acceptance so the final PDF describes the current multi-investment database design.
+See [Plan.md](Plan.md), [architecture](docs/ARCHITECTURE.md), [testing](docs/TESTING.md) and [student actions](USER_ACTIONS.md). The final PDF/source ZIP now describes the current multi-investment/database design. The final database export was obtained read-only on 8 October 2026 (2 projects, 10 stored events, 9 scan ranges) and added to the submission ZIP as JSON and SQL; see docs/evidence/database-export-2026-10-08.json. Course upload remains the student task.
 
 ## Limits
 
