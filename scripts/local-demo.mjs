@@ -1,6 +1,7 @@
 // Starts only local services. Optional funding uses Hardhat's unlocked local accounts.
 import { spawn } from "node:child_process";
-import { readFile } from "node:fs/promises";
+import { readFile, mkdir } from "node:fs/promises";
+import { resolve } from "node:path";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { JsonRpcProvider, parseEther } from "ethers";
@@ -58,11 +59,14 @@ try {
     provider.destroy();
     console.log("Funded public wallet " + wallet + " with 10 local test ETH.");
   }
-  const web = launch(python, ["app.py"], { CHAIN_ID: "31337", LOCAL_DEVELOPMENT: "true", RPC_URL: rpc,
+  await mkdir("instance", { recursive: true });
+  // A new local chain needs a matching fresh directory; never use the hosted database.
+  const databaseUrl = "sqlite:///" + resolve("instance", "demo-" + Date.now() + ".sqlite3").replaceAll("\\", "/");
+  const web = launch(python, ["app.py"], { CHAIN_ID: "31337", LOCAL_DEVELOPMENT: "true", RPC_URL: rpc, DATABASE_URL: databaseUrl,
     CONTRACT_ADDRESS: deployment.address, DEPLOYMENT_BLOCK: String(deployment.deploymentBlock), PORT: "5000" }, true);
   console.log("MicroInvest local demo: http://127.0.0.1:5000");
   console.log("MetaMask local network: RPC " + rpc + ", chain ID 31337, currency ETH.");
-  console.log("Stopping the demo resets the local chain. Sepolia data is unaffected. Press Ctrl+C to stop.");
+  console.log("Each new demo uses a fresh local chain and project directory. Sepolia data is unaffected. Press Ctrl+C to stop.");
   await completed(web);
 } catch (error) {
   console.error(error.message);

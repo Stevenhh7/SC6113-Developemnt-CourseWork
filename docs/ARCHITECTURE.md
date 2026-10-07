@@ -1,93 +1,105 @@
 # Architecture and API
 
-MicroInvest is a single-pool educational micro-investment workflow. A user contributes Sepolia test ETH, holds non-transferable internal shares at a fixed rate, and redeems principal on demand. No assets are invested elsewhere and no yield is modeled. Small fractional amounts make the workflow accessible to beginners without a business minimum.
+MicroInvest is an educational directory of independent investment pools. Any user deploys the same fixed-rule Solidity contract and registers a title/explanation. Other users search for that project, open its page, deposit test ETH and redeem their own principal. There is no external asset strategy, yield, administrator or creator withdrawal privilege.
 
-```mermaid
+~~~mermaid
 flowchart LR
-    U[Investing beginner] --> UI[English HTML / CSS / JS]
-    UI -->|Read requests| F[Flask APIs]
-    F -->|Web3.py HTTPS RPC| S[Sepolia]
-    UI -->|Approve and sign| M[MetaMask]
-    M -->|Deposit or redeem transaction| S
-    S --> C[MicroInvest contract]
-    C -->|State, events and receipt| S
-    R[Render + Gunicorn] --- F
-```
+    U[User] --> UI[HTML / CSS / JavaScript]
+    UI -->|Deploy / deposit / redeem| M[MetaMask]
+    M --> S[Sepolia: independent pool contracts]
+    UI -->|Public reads and signed project registration| F[Flask on Render]
+    F -->|Verify creation, read state / events / receipts| S
+    F -->|Store / search project metadata| DB[PostgreSQL]
+~~~
 
-The backend holds no signing key and provides no transaction submission endpoint. MetaMask and the user's network provider handle writes; Flask uses its separately configured RPC for reads. Both must use the same chain/address. The chain remains authoritative after backend restart. Browser local storage tracks the latest transaction for that wallet/pool/network and a preferred account for that pool/network; it is never a source of account balances or wallet permissions.
+Flask holds no wallet signing key and sends no chain transaction. PostgreSQL is authoritative for the project directory; Solidity state/events are authoritative for principal, shares and confirmed business activity. Removing or losing directory data does not transfer on-chain funds, but makes project discovery/pages unavailable until metadata is restored.
 
-## Contract state and transitions
+## Business contract
 
-| Entry point | Validation and behavior |
+Every project uses the unchanged MicroInvest contract and artifact:
+
+| Entry | Behavior |
 | --- | --- |
-| `deposit()` payable | `msg.value > 0`; increase caller's shares and `totalShares` by value; emit `Deposited` |
-| `withdraw(amountWei)` | Positive amount, caller has sufficient shares, guard against reentry; debit shares and total, transfer same wei, emit `Withdrawn`; failure rolls back everything |
-| `withdrawAll()` | Redeem the caller's complete nonzero position using the same withdrawal logic |
-| `shares(address)` | Read internal smallest-unit share balance |
-| `totalShares()` | Read total recorded redeemable principal in wei |
+| deposit() payable | Positive msg.value; credit caller and total shares by exactly that wei; emit Deposited |
+| withdraw(amountWei) | Positive amount within caller's shares; guard reentry; debit, transfer equal wei and emit Withdrawn; transfer failure rolls back |
+| withdrawAll() | Redeem caller's complete nonzero position |
+| shares(address), totalShares() | Exact internal smallest-unit shares |
+| totalPrincipal(), accounting() | Recorded entitlement, actual ETH balance, excess and solvency |
 
-One ETH and one displayed share each contain `10^18` units. For example 0.001 ETH credits exactly `10^15` units, displayed as 0.001 shares. There is no ERC-20 share token, owner, administrator, transfer, pause or upgrade method. The deploying wallet is an ordinary participant. Each valid call changes only the caller's ledger entry. Successful deposits/redemptions emit indexed investor events with amount and resulting shares.
+One displayed share = 10^18 share units = 1 ETH principal. Fractional amounts never use floating point. No ERC-20 share transfers, fee, owner/pause/upgrade interface exists. Plain unaccounted sends are rejected; forced ETH creates neither shares nor yield. Each deployment has its own ledger, balance and events.
 
-Accounting invariants under supported operations:
+## Directory and trusted registration
 
-```text
-totalShares = sum of all investor share-unit balances
-redeemableWei(user) = shares(user)
-contractBalanceWei >= totalShares
-deposit(v):  userShares += v; totalShares += v
-withdraw(v): userShares -= v; totalShares -= v; caller receives v
-```
+The investments table stores ID, chain ID, lower-case unique contract address, deployment block/hash, creator address, name, description, case-folded search text and UTC creation time. See schema.sql. The address and creation hash are unique within a network; names need not be unique. PostgreSQL is required on Render; local SQLite is ignored development data.
 
-No platform fee is deducted. Gas is paid separately from the wallet. Native ETH forcibly sent outside the deposit path can produce excess balance; it creates no ledger entry or yield and has no administrative rescue path. `pool` exposes excess separately. The test-only `ForcedEther` helper uses `selfdestruct`; the business contract does not.
+Creation proceeds through a browser wallet deployment, receipt confirmation and EIP-191 message signature. The canonical message includes the exact normalized name/description, creation hash, network and HTTP origin. The server recovers the signing wallet and independently checks the actual transaction:
 
-## Public GET APIs
+- Target network matches the configured chain.
+- Transaction directly creates a contract and has a successful receipt.
+- Creation input and current deployed runtime bytecode exactly match the supported artifact.
+- Recovered signer equals the transaction's actual deployer.
 
-Flask serves `/`, `/activity` and `/deploy`, and these JSON endpoints. All amounts in smallest units are **decimal strings**, never JSON floating-point numbers. Display decimals are also strings. Block numbers and timestamps are ordinary integers. APIs are read-only and do not authenticate public chain data.
+Only server-derived address, block and creator are saved. An identical retry returns the same ID; different metadata for a registered contract returns 409. Registration changes no contract rights and sends no funds. A repeated identical signature cannot rename the immutable project. Smart-contract-wallet/factory deployments are outside this version's direct MetaMask deployment flow.
 
-| Route | Response / responsibility |
+The original configured pool is imported as Original MicroInvest Pool on startup. Existing state and original public deployment evidence remain valid. Initialization runs once before Gunicorn workers start; workers subsequently reuse the existing table and row. Published names/explanations cannot be edited through the current API.
+
+## Search and page scope
+
+GET /api/investments accepts q, page, limit and optional creator. Literal case-folded matching covers name, description, address and creator. Whitespace-separated words must all match; a numeric query also matches the exact directory ID, ranked first. SQL binding/escaping prevents SQL input and wildcard characters from changing query structure. It is not semantic/fuzzy search.
+
+Each detail page receives a validated project ID and appends investment=<id> to blockchain API requests. ChainService.for_pool creates a per-request service with that project's address/deployment block; it does not mutate the shared original-pool settings. Unknown IDs fail rather than falling back to the original contract. The wallet signer uses the address from that project's validated public configuration.
+
+Browser pending-operation keys include chain, contract and wallet. A creation recovery record includes its deploying wallet, draft metadata and creation hash; rejected signing/server failure can retry the same contract. A hash is not proof of confirmation. Published IDs and metadata survive application restart through the database.
+
+## Routes
+
+All wei/share-unit values and display decimals are strings. IDs, blocks and timestamps are numbers. Public chain reads require no login.
+
+| Route | Responsibility |
 | --- | --- |
-| `/healthz` | Process liveness: `status`, app name, whether configuration fields are present; does not contact RPC |
-| `/api/config` | Public chain ID/name/hex, pool address, deployment block, explorer base, configured flag and ABI; omits RPC URL and credentials |
-| `/api/artifact` | Public compiler version, ABI, creation/runtime bytecode for browser wallet deployment |
-| `/api/pool` | Snapshot block, shares, recorded principal, actual balance, excess, solvency |
-| `/api/position/<wallet>` | Validated checksum address, snapshot block, shares, redeemable principal and wallet balance |
-| `/api/history/<wallet>?limit=20&cursor=BLOCK:LOGINDEX` | Wallet's confirmed deposits/redemptions, newest first, next cursor, scan bounds, latest block |
-| `/api/transactions/<hash>` | Target pool validation; `not_found`, `pending`, `success` or `failed`, receipt block, confirmations and gas |
+| / | Searchable Explore directory |
+| /deploy | Named investment creation and registration |
+| /investments/<id> | Selected project, pool, transaction controls and position |
+| /investments/<id>/activity?wallet=... | Selected project's full confirmed activity for a public wallet |
+| /healthz | Process liveness; does not prove RPC/database readiness |
+| /api/investments?q=...&page=1&limit=12&creator=... | Directory items, total, page, nextPage |
+| /api/investments/<id> | One project's public metadata |
+| POST /api/investments/registration-message | Validate draft, return canonical wallet message |
+| POST /api/investments | Verify signature/creation; register idempotently |
+| /api/artifact | Public ABI/compiler/creation/runtime bytecode |
+| /api/config?investment=<id> | Selected address/block, ABI, network, readiness and project metadata; no credentials |
+| /api/pool?investment=<id> | Selected pool's snapshot shares/principal/balance/excess/solvency |
+| /api/position/<wallet>?investment=<id> | Selected pool's shares/redeemable principal and wallet balance |
+| /api/history/<wallet>?investment=<id>&limit=20&cursor=BLOCK:LOGINDEX | Selected pool events, exclusive cursor, scan bounds |
+| /api/transactions/<hash>?investment=<id> | Receipt status and validation that transaction targets selected pool |
 
-An example position (illustrative, not a live Sepolia account):
+Without investment=<id>, original chain API routes and /activity still resolve the configured original pool for compatibility. New UI links always carry a specific project ID.
 
-```json
+POST registration example body:
+
+~~~json
 {
-  "sharesUnits": "1000000000000000",
-  "shares": "0.001",
-  "redeemableWei": "1000000000000000",
-  "redeemableEth": "0.001"
+  "name": "Community Solar Pool",
+  "description": "Learn small contributions together.",
+  "transactionHash": "0x...64 hexadecimal characters...",
+  "signature": "0x...wallet message signature..."
 }
-```
+~~~
 
-Controlled errors use `{"error":{"code":"...","message":"..."}}`. Bad address/hash, limit or cursor returns 400. Missing setup/artifact, mismatched RPC chain, wrong bytecode or unavailable RPC returns 503. Unexpected provider messages are replaced with a safe retry message and only exception class is logged, avoiding provider credentials. Unsupported methods return 405. No error response substitutes zero for unavailable balances.
+The client obtains the exact message first, signs it with getSigner(selectedAddress).signMessage(message), and submits the same metadata with the signature. Field lengths: title 1–120, description 1–2000; control characters are rejected except newline/tab. No arbitrary creator/address/block field is trusted.
 
-Every chain query verifies the configured chain and runtime bytecode. Pool/position amounts are read against an explicit snapshot block. A history page scans at most `HISTORY_PAGE_BLOCKS` and splits `eth_getLogs` into chunks of `LOG_CHUNK_SIZE`. Topics filter the contract's two events and the indexed investor. Only selected records require timestamp lookups.
+## Errors and history
 
-The cursor is the exclusive `(blockNumber, logIndex)` boundary. If an event limit splits one block, the next page includes that block but excludes previously delivered logs. Once a range is exhausted, `start:0` moves to older logs. An empty range can still have a next cursor: the UI permits continuing to earlier blocks. Large inactive periods therefore need multiple page requests rather than an unbounded RPC call.
+Controlled failures use {"error":{"code":"...","message":"..."}}. Validation is 400, unsupported JSON media 415, wrong deployer 403, unknown project 404, pending creation/conflicting registration 409 and unavailable RPC/database 503. Exception class alone is logged; raw provider/database credential strings are not returned. Unavailable balances are never shown as zero.
 
-The overview requests `limit=5` and caps the displayed recent records at five. Its **View all activity** link carries the selected public wallet address to `/activity?wallet=...`. The independent read-only page requests 20 records per page and appends older cursor pages until all activity is loaded. It works from that public address without signing or wallet installation; connecting/changing an actual wallet selects its account and clears previous records. Both pages use one safe text-only table renderer. Refresh resets complete-history pagination to the newest page.
+Every chain read validates network and runtime code. State reads use a snapshot block. History scans bounded block windows and bounded eth_getLogs chunks, filters contract + indexed investor, and uses exclusive (blockNumber, logIndex) cursors so same-block events are not skipped. Empty ranges can still have older pages.
 
-## User and transaction lifecycle
+The detail overview caps recent rows at five. Full activity uses 20-row cursor pages and safely renders text. Refresh resets pagination; account/network changes clear stale state. Asynchronous generations prevent earlier responses from overwriting another wallet's current page.
 
-1. Read public configuration/pool; explain fixed shares, testnet, no yield and gas.
-2. Connect MetaMask and select the configured network. The shared header menu lists valid addresses returned by `eth_accounts`. Selecting an address clears previous position/history and loads the selected account through Flask. The saved account preference is used only if still in that returned list. A user click on Manage accounts invokes `wallet_requestPermissions` for `eth_accounts`; simply opening the menu requests no permissions.
-3. Validate positive decimal input and current redeemable balance. Recheck network and the selected address's membership in `eth_accounts` immediately before signing; the selected address need not be the first list entry. Use `getSigner(selectedAddress)` for the transaction. Account menu operations and transaction submissions temporarily disable conflicting actions. A deposit also estimates gas and checks wallet balance.
-4. Request wallet approval. A rejected request is not a transaction. Once a hash exists, mark the operation pending and store the hash under its network/pool/wallet.
-5. Wait for a mined receipt. Status 1 produces confirmed feedback and fresh state reads; status 0 reports revert. A replacement/cancellation is tracked separately. Timeout or connection failure preserves the hash as unknown and permits rechecking.
-6. On account/network change, clear position/history and disable writes until the new context is loaded. Earlier asynchronous responses cannot overwrite a newer context.
+## Wallet and deployment boundaries
 
-One mined confirmation is sufficient for the coursework UI; further confirmations and chain finality should be considered for a production financial application. Successful chain events provide confirmed history. Wallet rejection has no chain event and is shown as current operation feedback, not fabricated history.
+The account menu exposes only addresses returned by MetaMask. A stored preference is valid only while still authorized. Before signing, the UI checks network and selected membership, then explicitly selects that signer. Creators can also participate in any pool and redeem only their own position. Other participants cannot register creator metadata or redeem another holder's principal.
 
-## Security, availability and deployment
+Title/description are escaped by Jinja or rendered with textContent. Local script bundles and a restrictive Content Security Policy remain in place. Backend RPC/database secrets stay in environment settings. PostgreSQL stores public addresses and project text, not private keys, balances or identities.
 
-Withdrawals follow checks/effects/interactions with a reentrancy lock; transfer failure reverts debits. Solidity's checked integer arithmetic and exact frontend/backend formatting avoid floating-point loss. The UI uses text nodes for event data, local scripts/libraries and a restrictive Content Security Policy. Provider credentials stay server-side. `/deploy` can be public because each visitor creates a separate pool with their own wallet; it cannot replace the running server's address or acquire special privileges.
-
-The only accepted deployment network is Sepolia; a local chain requires explicit `LOCAL_DEVELOPMENT=true`. Render runs Gunicorn and needs no Node process, database or persistent disk. ABI/bytecode and ethers are committed build outputs. Configuration is in service environment variables, not generated server files. See README for build/start commands and the health-vs-readiness distinction.
-
-No database reduces synchronization complexity but makes history dependent on RPC latency, range limits and availability. Queries remain bounded and retryable. No caching/indexer, user authentication, advanced portfolio management or audited real-money custody is included. These are deliberate limits of the agreed simple coursework scope.
+Render uses Python/Gunicorn and PostgreSQL, with no Node backend or SQLite persistence. DATABASE_URL is mandatory PostgreSQL online. A directory outage blocks project lookup; RPC failure blocks chain-dependent controls. Single-confirmation status is not finality. Moderation, edit workflows, on-chain metadata anchoring, authentication profiles, yield strategies and production audit/load testing remain outside scope.

@@ -4,22 +4,22 @@
   <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="MicroInvest is a simple educational testnet pool for learning small deposits, shares and redemptions.">
-  <title>MicroInvest · Start small. Understand every step.</title>
+  <title>{{ investment.name }} · MicroInvest</title>
   <link rel="stylesheet" href="/static/styles.css">
   <script src="/static/vendor/ethers.umd.min.js" defer></script>
   <script src="/static/app.js" type="module"></script>
 </head>
-<body>
+<body data-investment-id="{{ investment.id }}">
   <header class="header shell">
     <a class="brand" href="/" aria-label="MicroInvest home"><span class="brand-mark" aria-hidden="true">m<span>i</span></span>MicroInvest</a>
-    <nav aria-label="Main navigation"><a href="#how-it-works">How it works</a><span id="network-badge" class="network"><span class="dot"></span>Sepolia</span>{% include '_wallet_menu.html' %}</nav>
+    <nav aria-label="Main navigation"><a href="/">Explore</a><a href="/deploy">Create investment</a><span id="network-badge" class="network"><span class="dot"></span>Sepolia</span>{% include '_wallet_menu.html' %}</nav>
   </header>
   <main class="shell">
     <section class="hero">
-      <div><p class="eyebrow">SMALL STEPS. CLEAR OWNERSHIP.</p><h1>Your first step<br>into <span>on-chain investing.</span></h1><p class="hero-copy">Start with a small test deposit. See your shares, follow every transaction, and redeem whenever you choose.</p></div>
+      <div><a class="back-link" href="/">← Explore investments</a><p class="eyebrow project-kicker">INVESTMENT #{{ investment.id }}</p><h1>{{ investment.name }}</h1><p class="hero-copy project-description">{{ investment.description }}</p><p class="project-address">Contract: {{ investment.contractAddress }}{% if investment.creator %}<br>Created by: {{ investment.creator }}{% endif %}</p></div>
       <aside class="hero-note"><span class="pill">EDUCATIONAL TESTNET</span><p>Learn with test ETH.</p><span>This pool demonstrates deposits and redemptions. It does not generate investment returns.</span></aside>
     </section>
-    <div id="setup-message" class="notice hidden" role="status">The pool is not configured yet. <a href="/deploy">Deploy a contract with MetaMask</a>, then configure the server using the generated deployment details.</div>
+    <div id="setup-message" class="notice hidden" role="status">This investment is temporarily unavailable. Please retry after its network connection is restored.</div>
     <div id="page-message" class="notice hidden" role="alert"></div>
     <section class="stats" aria-label="Pool summary">
       <article class="stat"><p>Total pool principal</p><h2><span id="pool-principal">—</span><small>test ETH</small></h2><span>Backed by the contract</span></article>

@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Explore investments · MicroInvest</title>
+  <meta name="description" content="Find educational investments or create your own independent Sepolia pool.">
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/styles.css">
+  <script src="/static/explore.js" type="module"></script>
+</head>
+<body>
+  <header class="header shell">
+    <a class="brand" href="/"><span class="brand-mark" aria-hidden="true">m<span>i</span></span>MicroInvest</a>
+    <nav aria-label="Main navigation"><a href="/deploy">Create investment</a><span id="network-badge" class="network"><span class="dot"></span>Sepolia</span>{% include '_wallet_menu.html' %}</nav>
+  </header>
+  <main class="shell">
+    <section class="hero">
+      <div><p class="eyebrow">FIND YOUR NEXT SMALL STEP</p><h1>Explore an investment.<br><span>Or start your own.</span></h1><p class="hero-copy">Discover projects by name or topic. Each investment has its own contract, shares and transaction history.</p></div>
+      <aside class="hero-note"><span class="pill">EDUCATIONAL TESTNET</span><p>Learn with test ETH.</p><span>1 ETH = 1 share. No investment returns or platform fees. Redeem your principal anytime.</span><a class="button small create-link" href="/deploy">Create investment ↗</a></aside>
+    </section>
+    <form id="search-form" class="search-form" role="search">
+      <label for="project-search">Find an investment</label>
+      <div class="search-controls"><input id="project-search" name="q" type="search" maxlength="200" placeholder="Search by name, keywords, contract address or ID" autocomplete="off"><button class="button" type="submit">Search</button></div>
+      <label class="mine-filter"><input id="my-investments" type="checkbox"> Only projects I created</label>
+    </form>
+    <p id="page-message" class="notice error hidden" role="alert"></p>
+    <div class="catalog-heading"><h2>Investments</h2><span id="results-state" class="muted" role="status" aria-live="polite">Loading investments…</span></div>
+    <section id="project-list" class="project-grid" aria-label="Investment search results"></section>
+    <p id="projects-empty" class="empty hidden">No investments found. Try another name or topic.</p>
+    <div class="catalog-pagination"><button id="previous-projects" class="button secondary small" disabled>Previous</button><span id="project-page" class="muted">Page 1</span><button id="next-projects" class="button secondary small" disabled>Next</button></div>
+    <footer><span>MicroInvest · Independent pools. Clear ownership.</span><span>Sepolia testnet only · No yield · No platform fees</span></footer>
+  </main>
+</body>
+</html>

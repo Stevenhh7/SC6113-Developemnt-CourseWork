@@ -3,6 +3,20 @@ on: [push, pull_request, workflow_dispatch]
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: microinvest_test
+          POSTGRES_PASSWORD: local-ci-only
+          POSTGRES_DB: microinvest_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U microinvest_test -d microinvest_test"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      TEST_DATABASE_URL: postgresql://microinvest_test:local-ci-only@127.0.0.1:5432/microinvest_test
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4

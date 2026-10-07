@@ -1,5 +1,6 @@
 import { parseAmount, formatAmount, walletError } from "./numbers.js";
 import { renderActivityRows } from "./activity-table.js";
+import { scopedApi, activityPath } from "./investment-context.js";
 import { createWalletMenu, connectedAccounts, authorizeAccounts, preferredAccount, rememberAccount } from "./wallet-menu.js";
 
 const HOME_ACTIVITY_LIMIT = 5;
@@ -19,7 +20,7 @@ async function api(path) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 35000);
   try {
-    const response = await fetch(path, { signal: controller.signal, cache: "no-store" });
+    const response = await fetch(scopedApi(path), { signal: controller.signal, cache: "no-store" });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error?.message || "The request could not be completed.");
     return data;
@@ -109,7 +110,7 @@ function renderHistory() {
   $("history-empty").classList.toggle("hidden", state.items.length > 0);
   $("history-empty").textContent = !state.wallet ? "Connect your wallet to see your activity."
     : state.cursor ? "No recent activity. View all activity to browse older records." : "No confirmed activity yet.";
-  $("view-all-activity").href = state.wallet ? "/activity?wallet=" + encodeURIComponent(state.wallet) : "/activity";
+  $("view-all-activity").href = state.wallet ? activityPath + "?wallet=" + encodeURIComponent(state.wallet) : activityPath;
 }
 async function history() {
   if (!state.wallet || !state.config.configured || state.historyBusy) return;

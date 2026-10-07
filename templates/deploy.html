@@ -3,27 +3,34 @@
 <head>
   <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Contract setup · MicroInvest</title>
+  <title>Create investment · MicroInvest</title>
   <link rel="stylesheet" href="/static/styles.css">
   <script src="/static/vendor/ethers.umd.min.js" defer></script>
   <script src="/static/deploy.js" type="module"></script>
 </head>
-<body><main class="shell setup-page">
-  <a class="brand" href="/">← MicroInvest</a>
-  <h1>Deploy your testnet pool</h1>
-  <p>This setup page deploys the compiled MicroInvest contract through MetaMask. Your wallet signs the deployment; no private key is exported or sent to Flask.</p>
-  <article class="card">
-    <p id="deploy-network">Loading network configuration…</p>
-    <p>Use a wallet funded with test ETH. Deployment spends network gas. Each deployment creates a new, independent pool.</p>
-    <div class="setup-actions"><button id="deploy-connect" class="button" disabled>Connect MetaMask</button><button id="deploy-contract" class="button secondary" disabled>Deploy contract</button></div>
-    <p id="deploy-status" role="status" aria-live="polite"></p>
-    <a id="deploy-tx" target="_blank" rel="noopener noreferrer" class="hash-link"></a>
-  </article>
-  <article id="deploy-result" class="card hidden">
-    <h2>Deployment confirmed</h2>
-    <p>Copy these values into your local .env file or the Render service's environment settings, then restart the service.</p>
-    <pre id="deploy-env"></pre>
-    <div class="setup-actions"><button id="copy-deployment" class="button small">Copy settings</button><button id="download-deployment" class="button secondary small">Download deployment JSON</button></div>
-    <p>The pool has no administrator. The deploying wallet receives no management or withdrawal privileges.</p>
-  </article>
-</main></body></html>
+<body>
+  <header class="header shell"><a class="brand" href="/">← MicroInvest</a><nav><span id="network-badge" class="network"><span class="dot"></span>Sepolia</span>{% include '_wallet_menu.html' %}</nav></header>
+  <main class="shell setup-page">
+    <h1>Create your investment</h1>
+    <p>Give your project a name and explain it. Deploy an independent contract, then sign a message to add it to the directory.</p>
+    <article class="card">
+      <p id="deploy-network">Loading network configuration…</p>
+      <form id="create-investment" novalidate>
+        <label class="project-field" for="investment-name">Investment name<input id="investment-name" type="text" maxlength="120" required placeholder="e.g. My first investment pool"></label>
+        <label class="project-field" for="investment-description">Description<textarea id="investment-description" rows="5" maxlength="2000" required placeholder="Explain your project's topic and purpose."></textarea></label>
+        <p>All projects use the same rules: 1 ETH = 1 share, no yield or platform fee, and anytime principal redemption. Creating a project gives you no power to withdraw another participant's funds.</p>
+        <button id="deploy-contract" class="button" type="submit" disabled>Deploy investment ↗</button>
+      </form>
+      <p id="deploy-status" role="status" aria-live="polite"></p>
+      <a id="deploy-tx" target="_blank" rel="noopener noreferrer" class="hash-link"></a>
+    </article>
+    <article id="deploy-result" class="card hidden">
+      <h2 id="result-title">Deployment submitted</h2>
+      <p id="registration-note">Keep this deployment record. Registration can be retried without creating another contract.</p>
+      <pre id="deploy-env"></pre>
+      <div class="setup-actions"><button id="register-investment" class="button" disabled>Retry registration</button><a id="open-investment" class="button hidden" href="/">Open investment →</a><button id="download-deployment" class="button secondary small">Download deployment JSON</button></div>
+      <button id="create-another" class="button secondary small hidden">Create another investment</button>
+    </article>
+  </main>
+</body>
+</html>

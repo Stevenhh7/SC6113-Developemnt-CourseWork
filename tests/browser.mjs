@@ -5,7 +5,8 @@ import { spawn } from "node:child_process";
 import { readFile, mkdir, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { chromium } from "playwright";
-import { JsonRpcProvider, ContractFactory } from "ethers";
+import { JsonRpcProvider, ContractFactory, Contract, HDNodeWallet, getBytes } from "ethers";
+import { resolve } from "node:path";
 
 const rpc = "http://127.0.0.1:18545";
 const origin = "http://127.0.0.1:5081";
@@ -52,20 +53,33 @@ try {
   const artifact = JSON.parse(await readFile("contract/MicroInvest.json", "utf8"));
   const contract = await new ContractFactory(artifact.abi, artifact.bytecode, signer).deploy();
   const receipt = await contract.deploymentTransaction().wait();
-  const environment = { CHAIN_ID:"31337", LOCAL_DEVELOPMENT:"true", RPC_URL:rpc,
+  await mkdir("test-results", {recursive:true});
+  const databaseUrl = "sqlite:///" + resolve("test-results/catalog-" + Date.now() + ".sqlite3").replaceAll("\\", "/");
+  const environment = { DATABASE_URL: databaseUrl, CHAIN_ID:"31337", LOCAL_DEVELOPMENT:"true", RPC_URL:rpc,
     CONTRACT_ADDRESS:await contract.getAddress(), DEPLOYMENT_BLOCK:String(receipt.blockNumber),
     PORT:"5081", RPC_TIMEOUT:"2", HISTORY_PAGE_BLOCKS:"5000", LOG_CHUNK_SIZE:"1000" };
   let server = launch(python, ["app.py"], environment);
   await waitForServer(origin + "/healthz", server);
   assert.equal((await (await fetch(origin+"/api/pool")).json()).principalWei, "0");
   mark("Flask verifies deployed bytecode and serves real chain data");
+  const seeded = (await (await fetch(origin + "/api/investments")).json()).items[0];
+  const overview = origin + seeded.url;
+  const signingWallets = [0,1].map(index => HDNodeWallet.fromPhrase("test test test test test test test test test test test junk", undefined, "m/44\'/60\'/0\'/0/" + index));
+  assert.equal(signingWallets[0].address, await signer.getAddress());
   const channel = process.env.BROWSER_CHANNEL || (process.platform === "win32" && !existsSync(chromium.executablePath()) && existsSync("C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe") ? "msedge" : undefined);
   browser = await chromium.launch({headless:true, channel});
   const page = await browser.newPage({viewport:{width:1440,height:1100}});
   const consoleErrors = [];
   page.on("pageerror", error=>consoleErrors.push(String(error)));
   await page.exposeFunction("localWalletRpc", async payload => {
-    try { return {result:await provider.send(payload.method, payload.params||[])}; }
+    try {
+      if (payload.method === "personal_sign") {
+        const account = signingWallets.find(candidate => candidate.address.toLowerCase() === payload.params[1].toLowerCase());
+        if (!account) throw new Error("Unknown simulated signing account");
+        return {result: await account.signMessage(getBytes(payload.params[0]))};
+      }
+      return {result:await provider.send(payload.method, payload.params||[])};
+    }
     catch (error) { return {error:{code:error.code,message:error.shortMessage||error.message}}; }
   });
   await page.addInitScript(({wallet, otherWallet}) => {
@@ -85,6 +99,7 @@ try {
         }
         if(payload.method==="eth_chainId") return chain;
         if(payload.method==="wallet_switchEthereumChain"){chain=payload.params[0].chainId;return null;}
+        if(payload.method==="personal_sign" && window.rejectNextRegistration){window.rejectNextRegistration=false;const e=new Error("User declined");e.code=4001;throw e;}
         if(payload.method==="eth_sendTransaction" && window.rejectNextWalletRequest){window.rejectNextWalletRequest=false;const e=new Error("User declined");e.code=4001;throw e;}
         const value=await window.localWalletRpc(payload);
         if(value.error){const e=new Error(value.error.message);e.code=value.error.code;throw e;}
@@ -94,7 +109,7 @@ try {
     window.changeWallet=(wallet)=>{accounts=wallet?[wallet]:[];connected=Boolean(wallet);for(const h of handlers.accountsChanged||[])h(accounts);};
     window.changeNetwork=(value)=>{chain=value;for(const h of handlers.chainChanged||[])h(value);};
   }, {wallet:await signer.getAddress(),otherWallet:await other.getAddress()});
-  await page.goto(origin);
+  await page.goto(overview);
   await page.locator("#connect-button").click();
   await waitUntil(async()=>await page.locator("#owned-shares").textContent()==="0");
   mark("Wallet connection and initial position");
@@ -164,7 +179,7 @@ try {
   await page.reload();
   await page.locator("#connect-button").click();
   await waitUntil(async()=>await page.locator("#history-body tr").count()===3);
-  mark("Backend restart restores history from chain without a database");
+  mark("Backend restart restores positions and history directly from chain");
   for (let i=1; i<=18; i++) await (await contract.deposit({value:BigInt(i)})).wait();
   await page.locator("#refresh-button").click();
   await waitUntil(async()=>await page.locator("#history-body tr").count()===5);
@@ -177,7 +192,7 @@ try {
   mark("Overview displays only the newest five confirmed records");
   await page.locator("#view-all-activity").click();
   await waitUntil(async()=>await page.locator("#history-body tr").count()===20);
-  assert.match(page.url(),/\/activity\?wallet=/);
+  assert.match(page.url(),/\/investments\/\d+\/activity\?wallet=/);
   await page.locator("#load-history").click();
   await waitUntil(async()=>await page.locator("#history-body tr").count()===21);
   assert.deepEqual(await page.locator("#history-body tr td:last-child a").allTextContents(),complete.map(item=>shortHash(item.transactionHash)));
@@ -204,7 +219,7 @@ try {
   mark("All-activity page preserves the wallet, paginates every record and handles refresh/account changes");
   mark("All-activity wallet menu switches the viewed account and updates its URL");
   await (await contract.withdrawAll()).wait();
-  await page.goto(origin);
+  await page.goto(overview);
   await page.locator("#connect-button").click();
   await waitUntil(async()=>await page.locator("#owned-shares").textContent()==="0");
   await page.locator("#connect-button").click();
@@ -240,13 +255,91 @@ try {
   await page.setViewportSize({width:390,height:844});
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),true);
   mark("Mobile layout does not overflow");
+  await page.setViewportSize({width:1440,height:1100});
   await page.goto(origin+"/deploy");
-  await page.locator("#deploy-connect").click();
+  await page.locator("#connect-button").click();
+  await waitUntil(()=>page.locator("#deploy-contract").isEnabled());
+  const blockBeforeInvalid = await provider.getBlockNumber();
   await page.locator("#deploy-contract").click();
-  await page.locator("#deploy-result").waitFor({state:"visible",timeout:30000});
-  assert.match(await page.locator("#deploy-env").textContent(),/CONTRACT_ADDRESS=0x/);
-  mark("Browser wallet deployment produces confirmed address and deployment block");
+  assert.match(await page.locator("#deploy-status").textContent(),/Enter a name/);
+  assert.equal(await provider.getBlockNumber(), blockBeforeInvalid);
+  await page.locator("#investment-name").fill("Solar Learning Pool");
+  await page.locator("#investment-description").fill("Beginner education about solar energy and small contributions.");
+  await page.locator("#deploy-contract").click();
+  await waitUntil(async()=>await page.locator("#result-title").textContent()==="Investment published");
+  const firstUrl = await page.locator("#open-investment").getAttribute("href");
+  const firstProject = await (await fetch(origin+"/api/investments/"+firstUrl.split("/").at(-1))).json();
+  assert.equal(firstProject.creator,await signer.getAddress());
+  assert.notEqual(firstProject.contractAddress, await contract.getAddress());
+  mark("Browser creates and registers a named independent investment through wallet deployment and signature");
+  await page.locator("#create-another").click();
+  await page.locator("#connect-button").click();
+  await page.locator("#authorize-accounts").click();
+  await waitUntil(()=>page.locator("#connect-button").isEnabled());
+  await page.locator("#connect-button").click();
+  await page.locator('.wallet-account[data-account="'+await other.getAddress()+'"]').click();
+  await page.locator("#investment-name").fill("Community Solar Pool");
+  await page.locator("#investment-description").fill("Community education about clean energy.");
+  await page.evaluate(()=>window.rejectNextRegistration=true);
+  await page.locator("#deploy-contract").click();
+  await waitUntil(async()=>(await page.locator("#deploy-status").textContent()).includes("declined"));
+  const confirmedHash = await page.locator("#deploy-tx").textContent();
+  assert.equal(await page.locator("#deploy-contract").isDisabled(),true);
+  await page.reload();
+  await page.locator("#deploy-result").waitFor({state:"visible"});
+  assert.equal(await page.locator("#deploy-tx").textContent(),confirmedHash);
+  await page.locator("#connect-button").click();
+  await waitUntil(()=>page.locator("#register-investment").isEnabled());
+  await page.locator("#register-investment").click();
+  await waitUntil(async()=>await page.locator("#result-title").textContent()==="Investment published");
+  const secondUrl = await page.locator("#open-investment").getAttribute("href");
+  const secondProject = await (await fetch(origin+"/api/investments/"+secondUrl.split("/").at(-1))).json();
+  assert.equal(secondProject.creator,await other.getAddress());
+  assert.equal(secondProject.transactionHash,confirmedHash);
+  mark("Second account creates a project; rejected registration survives reload and retries the same contract");
   await page.goto(origin);
+  await page.locator("#project-search").fill("solar");
+  await page.locator("#search-form button").click();
+  await waitUntil(async()=>await page.locator(".project-card").count()===2);
+  await page.locator("#connect-button").click();
+  await page.locator("#my-investments").check();
+  await waitUntil(async()=>await page.locator(".project-card").count()===1);
+  assert.match(await page.locator(".project-card h3").textContent(),/Community/);
+  await page.setViewportSize({width:390,height:844});
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),true);
+  mark("Search matches name and description, filters by creator, and fits a mobile viewport");
+  await page.screenshot({path:"test-results/explore-mobile.png",fullPage:true});
+  const pools = [firstProject,secondProject].map(project=>new Contract(project.contractAddress,artifact.abi,signer));
+  for (const [index,url] of [firstUrl,secondUrl].entries()) {
+    await page.goto(origin+url);
+    await page.locator("#connect-button").click();
+    await waitUntil(()=>page.locator("#deposit-button").isEnabled());
+    assert.equal((await page.locator("#account-label").textContent()).toLowerCase(),(await signer.getAddress()).toLowerCase());
+    await page.locator("#deposit-amount").fill(index===0?"0.005":"0.002");
+    await page.locator("#deposit-button").click();
+    await waitUntil(async()=>await page.locator("#owned-shares").textContent()===(index===0?"0.005":"0.002"));
+    assert.equal(await page.locator("#history-body tr").count(),1);
+    assert.match(await page.locator("#view-all-activity").getAttribute("href"),new RegExp(url+"/activity"));
+  }
+  assert.equal(await pools[0].shares(await signer.getAddress()),5000000000000000n);
+  assert.equal(await pools[1].shares(await signer.getAddress()),2000000000000000n);
+  assert.equal(await contract.shares(await signer.getAddress()),0n);
+  await page.goto(origin+firstUrl);
+  await page.locator("#connect-button").click();
+  await waitUntil(()=>page.locator("#deposit-button").isEnabled());
+  await page.locator("#withdraw-tab").click();
+  await page.locator("#withdraw-all-button").click();
+  await waitUntil(async()=>await page.locator("#owned-shares").textContent()==="0");
+  assert.equal(await pools[1].shares(await signer.getAddress()),2000000000000000n);
+  mark("Projects isolate balances, writes and event history; a participant can invest in another creator's pool");
+  server.kill(); await new Promise(resolve=>server.once("exit",resolve));
+  server = launch(python,["app.py"],environment); await waitForServer(origin+"/healthz",server);
+  const persisted = (await (await fetch(origin+"/api/investments?q=solar")).json()).items;
+  assert.equal(persisted.length,2);
+  assert.ok(persisted.some(item=>item.id===firstProject.id));
+  assert.ok(persisted.some(item=>item.id===secondProject.id));
+  mark("Project names, IDs and contract addresses persist across a Flask restart");
+  await page.goto(overview);
   await page.locator("#connect-button").click();
   await waitUntil(async()=>await page.locator("#owned-shares").textContent()==="0");
   node.kill(); await new Promise(resolve=>node.once("exit",resolve));
@@ -259,6 +352,15 @@ try {
   mark("No browser script errors");
   await mkdir("test-results",{recursive:true});
   await writeFile("test-results/browser.json",JSON.stringify({environment:"local Hardhat + Flask + simulated EIP-1193 wallet",checks:results},null,2));
+} catch (error) {
+  if (browser) {
+    const current = browser.contexts()[0]?.pages()[0];
+    if (current) {
+      console.error("Browser failure context:", JSON.stringify({url:current.url(), status:await current.locator("#deploy-status").textContent().catch(()=>null), message:await current.locator("#page-message").textContent().catch(()=>null)}));
+      await current.screenshot({path:"test-results/browser-failure.png",fullPage:true}).catch(()=>{});
+    }
+  }
+  throw error;
 } finally {
   if(browser) await browser.close();
   for(const child of children) if(child.exitCode===null) child.kill();

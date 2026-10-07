@@ -1,50 +1,74 @@
-# 你还需要完成的操作
+# 新版上线与提交：你需要完成的操作
 
-代码已写入你确认的 `Course/SC6113-Developemnt-CourseWork` 仓库。合约、Flask 后端、英文前端、测试、README、本地启动工具、Sepolia 部署工具与 Render 配置已经完成。原有 12 项合约测试通过；2026-10-07 账户菜单更新通过 17 项后端测试、4 项金额/错误测试及 19 项浏览器联调检查。首页最多展示 5 条最近交易，完整历史通过“View all activity”进入独立分页页面查看。
+多 Investment 版本已经写入现有仓库。现在每个用户都能填写名称与说明，用 MetaMask 部署自己的合约并登记到目录；其他用户按名称、说明关键词、编号或合约地址搜索，进入对应详情页投入和赎回。
 
-连接后点击右上角钱包地址，即可在下拉菜单切换已授权账户。若只有一个账户，点击 **Manage accounts in MetaMask**，在钱包中授权其他账户后再切换；每笔投入、赎回由当前选择的账户签名。首页和完整记录页均已支持。刷新会恢复仍有授权的账户选择；切换网络后可使用菜单中的 **Reconnect wallet** 重新连接。真实 MetaMask 的授权弹窗仍需要你在自己的浏览器中确认。
+每个合约仍是 1 ETH = 1 份、无收益、无平台费、随时部分/全部赎回；创建者不能提取其他用户的本金。持仓、交易和历史按合约与账户区分。PostgreSQL 只存项目目录，链上资金不存入数据库。
 
-**Sepolia 合约与 Render 网站均已上线。** 合约地址为 `0xE560121978f80c390f6B0d091E9579A2812Cb3DD`，部署区块为 `11856501`。2026-10-07 你确认在 [Render 网站](https://sc6113-developemnt-coursework.onrender.com/) 完成了实际 MetaMask 功能测试，全部正常；独立只读核验也确认了线上 API、投入与部分/全部赎回回执。证据已保存于 `docs/evidence/`。以下部署步骤保留为重建参考，继续使用已部署资金池即可。
+验证结果：47 项后端测试、4 项金额测试、23 项本地浏览器检查通过。原有合约未修改，已有 12 项合约测试仍适用。本地验证包含两账户创建项目、取消签名后登记同一合约、按说明搜索、跨项目参与、资金/历史隔离和重启后目录恢复。真实 PostgreSQL 测试已加入 CI，但本机无数据库服务，该项未运行。
 
-**目前只需最后查看成品并提交。** 英文 LaTeX 已准备于 [report/MicroInvest_Report.tex](report/MicroInvest_Report.tex)，含全部 13 个章节、Ji Chengyu/G2608005K、架构图、真实测试数据及七张原始截图。完整源码与图片包为 [report/MicroInvest_LaTeX.zip](report/MicroInvest_LaTeX.zip)。按你最新要求，已生成 [8 页 PDF](report/MicroInvest_Report.pdf)，全部章节与截图保留，已逐页检查；截图已收齐，无需再补。具体记录见 [report/SCREENSHOT_CHECKLIST.md](report/SCREENSHOT_CHECKLIST.md)，最终检查见 [report/SUBMISSION_CHECKLIST.md](report/SUBMISSION_CHECKLIST.md)。
+**这些代码尚未替你推送或部署。线上仍是旧版；旧 PDF 与截图也描述旧版。**
 
-## 1 先在 VS Code 打开项目
+## 1 在 Render 新建 PostgreSQL
 
-打开当前仓库根目录，按照 [README.md](README.md) 配置 Node.js 24 / Python 3.12 / pnpm 11.19.0。当前电脑已安装项目依赖，可直接运行测试或应用；换电脑/提交后重建需要按 README 安装。
+1. 选择 **New → Postgres**，名称与规格由你选择。
+2. Region 与现有 Web Service 一致；之前的设置是 Oregon。
+3. 数据库就绪后，复制 **Internal Database URL**，在现有 Web Service 的 Environment 新增 **DATABASE_URL**。
+4. URL 含密码，直接填入 Render；不要发给我、放进 Git 或截图。
 
-可选本地演示：`pnpm run dev:local 你的钱包公开地址`。它自动启动本地链、部署合约、给该地址 10 个本地测试 ETH，再启动 Flask；MetaMask 自定义网络 RPC 为 `http://127.0.0.1:8545`，Chain ID 为 `31337`。这一步不使用 Sepolia，也不是最终线上部署。按 Ctrl+C 停止。
+[Render 官方说明](https://render.com/docs/free)规定免费 PostgreSQL 创建后 30 天过期。请按课程演示/提交日期选择能覆盖相应时间的方案。连接步骤见 [官方连接说明](https://render.com/docs/postgresql-creating-connecting)。
 
-## 2 用自己的钱包部署到 Sepolia
+## 2 更新现有网站
 
-1. 准备 MetaMask 测试钱包，开启 Sepolia，获取足够的 Sepolia 测试 ETH；投入与部署、退出都需要 Gas。
-2. 将 `.env.example` 复制为 `.env`，选择并填入自己的 Sepolia `RPC_URL`。保留 `CHAIN_ID=11155111`、`LOCAL_DEVELOPMENT=false`，暂时留空合约地址和部署区块。不需要填写 `DEPLOYER_PRIVATE_KEY`。
-3. 在项目根目录运行 `.\.venv\Scripts\python.exe app.py`，打开 `http://127.0.0.1:5000/deploy`。
-4. 连接 MetaMask，确认是 Sepolia，点击部署并在钱包中签名；等页面确认成功。部署若超时，先用已有哈希检查结果，避免重复部署新池。
-5. 保存页面显示的 `CONTRACT_ADDRESS`、`DEPLOYMENT_BLOCK` 和交易哈希。下载公开部署 JSON，可存为 `deployments/sepolia.json`；把地址和区块写入本地 `.env`，重启 Flask。
-6. 首页连接钱包，进行一笔小额投入、部分赎回和全部退出。示例投入 0.003 ETH，部分赎回 0.001 ETH，余下全部退出；数量可按你的测试 ETH 余额调整。
+检查并将新版源码提交、推送到已有 GitHub 仓库。保留原有 RPC_URL、CHAIN_ID=11155111、LOCAL_DEVELOPMENT=false、CONTRACT_ADDRESS、DEPLOYMENT_BLOCK；旧池会自动加入目录，新项目不用再修改环境变量。
 
-推荐的网页部署全程由 MetaMask 签名，后端不接触私钥。部署者没有管理特权。
+Build Command：
 
-## 3 发布到 Render
+~~~sh
+pip install -r requirements.txt
+~~~
 
-1. 检查并将代码提交、推送到已有 GitHub 仓库 `Stevenhh7/SC6113-Developemnt-CourseWork`。仓库公开/私有由你决定。不要提交 `.env`、钱包文件、虚拟环境或依赖目录。
-2. 在 Render 登录自己的账号，连接仓库，使用项目的 `render.yaml` 创建 Blueprint，或按 README 手动建立 Python Web Service。服务规格/费用由你选择。根目录保持仓库根目录，Root Directory 留空。
-3. 在 Render 填写自己的 `RPC_URL`、真实 `CONTRACT_ADDRESS` 与 `DEPLOYMENT_BLOCK`；`CHAIN_ID=11155111`，`LOCAL_DEVELOPMENT=false`，Python 3.12.10。不要配置部署私钥。
-4. 构建命令 `pip install -r requirements.txt`；启动命令 `gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120`；健康检查 `/healthz`。
-5. 部署后保存 HTTPS 网站地址，访问 `/api/pool` 核实真正连到正确合约，再从网站用实际 MetaMask 测试完整流程。刷新及重启 Render 后核实链上持仓、历史仍可查询。
+Start Command **改为**：
 
-`/healthz` 成功只代表 Web 服务运行；真实链上连接请检查 `/api/pool`。具体设置与故障排查见 README。当前没有替你选择付费方案或修改远程仓库。
+~~~sh
+python scripts/init-catalog.py && gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120
+~~~
 
-## 4 真实线上截图与测试记录（已完成）
+Root Directory 留空，Health Check 为 /healthz。如果原服务手动设置启动命令，需要在 Dashboard 手动更新，不能只推送 render.yaml。确认 DATABASE_URL 与启动命令已保存后重新部署。
 
-七张原图已保存于 `report/screenshots/` 并加入报告，覆盖部署、钱包、成功交易/完整历史、非法输入、赎回后零持仓、API 和 Render Live。图注已核对；API 与赎回状态来自不同区块。尺寸及 SHA-256 见 `manifest.json`，实际交易回执与 Gas 见 `docs/evidence/`。
+详细步骤和故障排查见 [docs/RENDER_UPDATE.md](docs/RENDER_UPDATE.md)。不要把私钥或助记词配置到服务中。
 
-[docs/TESTING.md](docs/TESTING.md) 已整理本地测试结果、安全性、可用性、Gas 数据和线上验收表，可用于你的报告资料。自动浏览器测试使用模拟钱包，不能代替真实 MetaMask/Sepolia 的截图与验证。没有真实新手用户参与的可用性研究，不要在报告里声称做过用户研究。
+## 3 用真实 MetaMask 验收新版
 
-## 5 完成英文 PDF 报告并提交
+1. 首页应显示 Explore 和原有资金池；原合约地址应保持正确。
+2. 账户 A 在 Create investment 填写名称/说明，批准合约部署，再批准登记消息；保存 ID、合约地址与交易哈希。
+3. 账户 B 创建第二个项目，可以拒绝一次登记签名，再刷新、连接部署账户，点击 Retry registration。应登记原来的合约，不重复部署。
+4. 分别用名称和说明关键词搜索；结果应进入对应项目。
+5. 同一账户参与两个项目，在一个项目部分/全部赎回后，另一个项目的持仓应保持不变。
+6. 切换账户，核对当前项目的个人持仓与历史。View all activity 应保留项目和账户。
+7. 重启/重新部署 Web Service 后，名称、编号、说明和地址仍在；持仓与历史仍与链上一致。
 
-英文 LaTeX 正文、截图及 PDF 已完成。`report/MicroInvest_Report.pdf` 共 **8 页**，符合原 Word 的 5–8 页要求；已逐页检查图文，覆盖全部 13 个部分：Introduction、Problem Statement、Objectives、System Architecture、Technologies Used、Smart Contract Design、Application Design、Implementation、Testing and Results、Challenges Encountered、Limitations、Future Improvements、Conclusion。按你最新要求使用本机 TeX Live 编译两次，无未解析引用或越界警告。若以后修改源码，解压报告 ZIP、保持 `screenshots/` 在 `.tex` 旁边，再用 pdfLaTeX 编译两次。
+部署用 Sepolia 测试 ETH 支付 Gas，登记名称的消息签名不花 Gas，也不转移资金。创建流程中断时保留部署记录，优先重试登记。
 
-可引用 `docs/ARCHITECTURE.md` 的架构/接口、`docs/TESTING.md` 的实际测试和 Gas，以及你的线上证据。明确项目是单资金池投资流程原型，只实现本金与份额，不产生收益或市场策略。不要把本地链结果写成 Sepolia 上线结果。
+## 4 提供新版截图，再更新报告
 
-最终提交源码（合约、前后端、测试、依赖配置、README）、真实公开部署信息、截图和 PDF；不需要数据库文件，也不需要视频。截止时间、提交平台、文件命名及页数细节未在现有文档明确的部分由你按课程通知确认。
+新版上线、验收后，建议提供这些真实截图：
+
+- 首页关键词搜索：显示至少两个项目结果及名称。
+- 创建成功：显示项目名称、ID、合约地址、部署哈希。
+- 项目详情：显示名称/说明、合约、非零个人持仓与 Confirmed 投入。
+- 赎回与历史：当前项目赎回成功，以及另一项目仍保留的持仓。
+- Render 新部署成功与 /api/investments 或带 investment 参数的资金池 API。
+
+截图不要出现数据库连接密码或 RPC 密钥。已有钱包、非法输入等原图可以保留作旧版证据，但报告必须解释版本。旧的 report/MicroInvest_Report.pdf、.tex、ZIP 没有覆盖这次改动，不应直接作为新版最终报告提交。最终报告仍需 5–8 页、全部 13 个规定章节。
+
+## 5 数据库与源码提交材料
+
+已提供 [docs/schema.sql](docs/schema.sql)。完成线上验收后，从最终数据库导出公开项目数据：
+
+~~~powershell
+.\.venv\Scripts\python.exe scripts/export-catalog.py --output test-results/catalog-public.json
+~~~
+
+在连接最终 PostgreSQL 的环境执行。留空 DATABASE_URL 会导出本地 SQLite，不是线上目录；本地连接 Render 需要其 External Database URL，内部 URL 用于 Render。无需把连接字符串发给我。导出包含公开名称/说明/ID/合约/创建者等资料，无密码、私钥或资金余额；它不是完整数据库备份工具。
+
+按课程通知提交源码、README、数据库结构与相关数据、公开部署信息、真实截图和修订后的 PDF。不要提交 .env、instance/、.venv、node_modules 或本地测试数据库。不需要视频。最终命名、入口与截止时间由你按课程通知确认。

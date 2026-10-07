@@ -1,7 +1,7 @@
 """Read-only Ethereum queries. Wallets sign writes; this service holds no keys."""
 import json
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 from web3 import Web3
@@ -61,6 +61,35 @@ class ChainService:
             Web3.to_hex(Web3.keccak(text=f"{item['name']}(address,uint256,uint256)")): item
             for item in artifact["abi"] if item["type"] == "event"
         }
+
+    def for_pool(self, contract_address, deployment_block):
+        if (contract_address.lower() == self.settings.contract_address.lower()
+                and deployment_block == self.settings.deployment_block):
+            return self
+        return ChainService(replace(self.settings, contract_address=address(contract_address),
+                                   deployment_block=deployment_block), self.artifact, self.w3.provider)
+
+    def deployment(self, value):
+        value = tx_hash(value)
+        if not self.settings.rpc_url:
+            raise ApiError("setup_required", "Configure the server RPC URL before creating an investment.", 503)
+        if self.w3.eth.chain_id != self.settings.chain_id:
+            raise ApiError("wrong_rpc_network", "The server RPC network does not match the configured network.", 503)
+        try:
+            transaction = self.w3.eth.get_transaction(value)
+            receipt = self.w3.eth.get_transaction_receipt(value)
+        except TransactionNotFound:
+            raise ApiError("deployment_pending", "The deployment is not confirmed yet. Retry registration with this hash.", 409) from None
+        if transaction["to"] or receipt["status"] != 1 or not receipt.get("contractAddress"):
+            raise ApiError("invalid_deployment", "Supply a successful direct MicroInvest deployment transaction.")
+        payload = transaction.get("input", transaction.get("data", b""))
+        payload = payload if isinstance(payload, str) else Web3.to_hex(payload)
+        deployed = address(receipt["contractAddress"])
+        if (payload.lower() != self.artifact["bytecode"].lower()
+                or Web3.to_hex(self.w3.eth.get_code(deployed)).lower() != self.artifact["deployedBytecode"].lower()):
+            raise ApiError("wrong_contract", "This deployment does not match the supported MicroInvest contract.")
+        return {"address": deployed, "deploymentBlock": receipt["blockNumber"],
+                "deployer": address(transaction["from"]), "transactionHash": value.lower()}
 
     def check(self):
         if not self.settings.rpc_url or not self.settings.contract_address or self.settings.deployment_block is None:

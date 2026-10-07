@@ -1,5 +1,6 @@
 import { walletError } from "./numbers.js";
 import { renderActivityRows } from "./activity-table.js";
+import { scopedApi, activityPath } from "./investment-context.js";
 import { createWalletMenu, connectedAccounts, authorizeAccounts, preferredAccount, rememberAccount } from "./wallet-menu.js";
 
 const $ = id => document.getElementById(id);
@@ -21,7 +22,7 @@ async function api(path) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 35000);
   try {
-    const response = await fetch(path, { signal: controller.signal, cache: "no-store" });
+    const response = await fetch(scopedApi(path), { signal: controller.signal, cache: "no-store" });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error?.message || "Activity could not be loaded. Please retry.");
     return data;
@@ -70,10 +71,10 @@ async function selectWallet(wallet) {
   state.generation++; state.wallet = null; state.items = []; state.cursor = null; state.busy = false; state.failed = false;
   $("history-state").textContent = "";
   render();
-  if (!wallet) { notice(); window.history.replaceState(null, "", "/activity"); return; }
+  if (!wallet) { notice(); window.history.replaceState(null, "", activityPath); return; }
   if (!/^0x[0-9a-fA-F]{40}$/.test(wallet)) { notice("Enter a valid Ethereum wallet address."); return; }
   state.wallet = wallet; render();
-  window.history.replaceState(null, "", "/activity?wallet=" + encodeURIComponent(wallet));
+  window.history.replaceState(null, "", activityPath + "?wallet=" + encodeURIComponent(wallet));
   await loadHistory(true);
 }
 async function connect() {

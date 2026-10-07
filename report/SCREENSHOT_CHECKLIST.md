@@ -1,5 +1,7 @@
 # 报告截图清单
 
+**以下为第一版已收齐的截图记录。** 新版已增加多 Investment、搜索与 PostgreSQL，需要新截图，旧图不能单独证明新版上线。新拍摄清单见 [USER_ACTIONS.md](../USER_ACTIONS.md) 第 4 部分；旧图原样保留，更新报告时区分版本。
+
 作者：Ji Chengyu，G2608005K。请优先在已测试通过的 [Render 网站](https://sc6113-developemnt-coursework.onrender.com/) 截图，使用 Sepolia。
 
 原 Word 的 VIII Testing 明确要求成功交易、非法输入、钱包连接、合约部署以及结果截图。计划还要求持仓、赎回、历史和后端集成的证据。目前共七张原图已收齐，全部加入 LaTeX；第 3 张同时覆盖成功交易与完整历史，无需额外第 5 张。

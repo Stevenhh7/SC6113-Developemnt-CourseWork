@@ -1,5 +1,7 @@
 # Report source and screenshots
 
+**Version 1 report.** These PDF/LaTeX/ZIP files describe the accepted single-pool version without a database. The current source adds multiple projects, search, signed registration and PostgreSQL. Revise the report and new live evidence after updated Render acceptance before submitting the new version. See [student actions](../USER_ACTIONS.md) and [the deployment guide](../docs/RENDER_UPDATE.md).
+
 The report is authored in English for Ji Chengyu, G2608005K. `MicroInvest_Report.tex` is the authoritative editable source. It contains all 13 sections specified by the assignment, two TikZ diagrams, actual automated results, Sepolia receipts and the public Render URL. At the student's subsequent request, `MicroInvest_Report.pdf` was compiled on 7 October 2026 using the installed TeX Live 2024 pdfLaTeX engine. The final report has 8 pages, all 13 sections and seven screenshots; all pages were visually reviewed. The LaTeX source remains editable.
 
 ## Compile
@@ -45,4 +47,4 @@ The evidence collector is separate document tooling. It is not an application en
 python scripts/collect-report-evidence.py
 ```
 
-Run that command from the repository root only when a new verification record is needed. Report authoring does not add a database or change the deployed application.
+Run that command from the repository root only when a new verification record is needed. The collector targets the original pool and does not cover the new project directory or PostgreSQL; the current application design is documented in ../docs/ARCHITECTURE.md.

@@ -1,42 +1,34 @@
-# 最终提交检查
+# 新版最终提交检查
 
-作业原文要求：5-8 页 PDF 报告、源码、README 和截图；无需视频，无数据库时无需数据库文件。
+原作业要求 5–8 页 PDF、源码、README、截图，以及采用数据库时的数据库相关内容；不需要视频。
 
-## 当前状态
+## 多 Investment 版本的当前状态
 
-- [x] Solidity、Flask、HTML/CSS/JS、测试与依赖配置已完成。
-- [x] Sepolia 合约已部署，创建回执及运行字节码已核验。
-- [x] Render 网站可访问，公开 API 连接正确合约。
-- [x] 用户确认在 Render 上完成 MetaMask 功能测试，全部正常。
-- [x] 英文 LaTeX 报告源码已准备，包含姓名 Ji Chengyu、学号 G2608005K 和全部 13 个章节。
-- [x] 已记录本地自动测试、真实 Sepolia 金额、交易哈希及 Gas，且明确区分证据来源。
-- [x] 七张原始截图已整理进 `report/screenshots/`，全部加入 LaTeX 并核对图注：部署、钱包、成功交易/完整历史、非法输入、零持仓、API 与 Render Live。图片尺寸和 SHA-256 已记录；API 与赎回图片的不同区块已说明。
-- [x] `report/MicroInvest_LaTeX.zip` 提供可自行编译的报告源码、七张原图及说明。
-- [x] 按用户最新要求编译 `MicroInvest_Report.pdf`，最终 8 页，保留全部 13 章与七张截图，已逐页检查排版。LaTeX 重复编译后无未解析引用或越界警告。
-- [ ] 确认课程最终命名、提交入口和截止时间，再提交完整材料。
+- [x] 用户创建独立合约、填写名称/说明、部署者签名登记。
+- [x] 项目目录、名称/说明关键词搜索、编号/地址区分与创建者筛选。
+- [x] 独立详情页、账户菜单、投入/持仓/部分及全部赎回、独立分页历史。
+- [x] PostgreSQL 支持、本地 SQLite、数据库结构与公开目录导出脚本。
+- [x] 47 项后端测试、4 项金额测试、23 项本地浏览器检查通过。
+- [x] PostgreSQL 专项测试加入 CI；本机无数据库而跳过，不能标为已通过。
+- [ ] 配置真实 PostgreSQL、更新现有 Render 启动命令、推送源码并重新部署。
+- [ ] 新版真实 MetaMask/Sepolia 验收：两创建者、搜索、跨项目参与与资金隔离、重启恢复。
+- [ ] 提供新版创建/搜索/详情/交易/Render/API 截图，详见 ../USER_ACTIONS.md。
+- [ ] 修订报告的架构、数据库、应用设计、实现、测试、限制与结论，编译检查 5–8 页 PDF。
+- [ ] 从最终数据库导出并核对公开目录数据，提交 docs/schema.sql 与相关资料；不包含连接密码。
+- [ ] 按课程通知确认最终命名、提交入口和截止时间，提交全部材料。
 
-## 报告章节核对
+## 保留的第一版报告
 
-1. Introduction
-2. Problem Statement
-3. Objectives
-4. System Architecture
-5. Technologies Used
-6. Smart Contract Design
-7. Application Design
-8. Implementation
-9. Testing and Results
-10. Challenges Encountered
-11. Limitations
-12. Future Improvements
-13. Conclusion
+已有 MicroInvest_Report.tex、8 页 MicroInvest_Report.pdf、MicroInvest_LaTeX.zip 和七张原图是第一版单资金池、无数据库的报告，作者 Ji Chengyu、G2608005K。原有 Sepolia 部署、Render 验收、真实交易/Gas 和截图均保留，不冒充新版证据。它们需要修订后才能描述当前实现。
 
-安全性是 Word 中的明确要求。报告已经说明调用者权限、输入校验、重入与转账失败测试、私钥保护、Gas 观察和公开链数据隐私；并未声称经过商业审计、压力测试或新手用户研究。
+## 报告章节
 
-## 源码与证据
+仍需保留全部 13 个部分：Introduction、Problem Statement、Objectives、System Architecture、Technologies Used、Smart Contract Design、Application Design、Implementation、Testing and Results、Challenges Encountered、Limitations、Future Improvements、Conclusion。
 
-提交现有项目源码，保留 `contracts/`、`contract/MicroInvest.json`、`app.py`、`microinvest/`、`templates/`、`static/`、测试、脚本、依赖清单及锁文件、`render.yaml`、README 与公开部署记录。LaTeX 源码和原始截图可一并提交，最终报告格式仍按要求使用 PDF。
+安全性是 Word 明确要求。说明已有调用者权限、输入/签名/字节码校验、重入和转账失败测试、私钥边界、Gas 和公开数据隐私，区分已运行测试与尚未运行的 PostgreSQL/新版线上验收。不要声称商业审计、压力测试或新手参与者研究。
 
-打包时不纳入 `.env`、私钥、助记词、RPC 密钥、`.venv/`、`node_modules/`、本地链缓存或 LaTeX 临时文件。公开网址、合约地址和交易哈希可以作为项目证据。源码中无需提供部署签名密钥。
+## 打包
 
-报告中的三个金额案例和 Gas 来自已核验的 Sepolia 回执；若截图展示另一笔交易，图注保留其实际金额/哈希，不把不同交易误写为同一案例。无需为了报告重新部署合约。
+提交业务合约、artifact、Flask 与目录模块、前端、测试、脚本、依赖/锁文件、render.yaml、README、数据库结构/相关数据、公开部署信息、真实截图及修订 PDF。排除 .env、数据库/RPC 密码、私钥、助记词、instance/、.venv/、node_modules/、本地链缓存和 LaTeX 临时文件。
+
+完整新版上线与截图操作见 ../USER_ACTIONS.md 和 ../docs/RENDER_UPDATE.md。

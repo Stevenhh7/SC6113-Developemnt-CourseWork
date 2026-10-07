@@ -1,40 +1,50 @@
 # MicroInvest implementation plan and status
 
-This repository implements the confirmed plan from `Course/PROJECT_PLAN.md` and the SC6113 assignment. The user confirmed this existing repository as the target. On 2026-10-07, after completing tests on Render, the user authorized the remaining report and handoff work. The report is supplied as editable LaTeX with all seven student screenshots and a compiled 8-page PDF, generated at the student's subsequent request.
+This repository is the user-confirmed target inside Course. It implements the SC6113 assignment and Course/PROJECT_PLAN.md. Version 1 was deployed and accepted on Render; the user subsequently requested the multi-investment update below on 7 October 2026.
 
-## Confirmed scope
+## Current confirmed scope
 
-Investing beginners; single pool; Sepolia test ETH; fixed fractional 1 ETH = 1 internal share; positive amounts without additional business thresholds; no yield/fee/share transfers; anytime partial/full principal redemption; no administrator. Flask, vanilla HTML/CSS/JS, no database, Hardhat, VS Code, English dark UI, Render deployment.
+Investing beginners; any authorized wallet can create its own independent Investment contract and supply a title/explanation. Search by name or related words, open a project-specific detail page and participate in that contract. PostgreSQL stores the online directory; local SQLite is a development fallback.
 
-## Stages
+Each contract retains the agreed rules: Sepolia test ETH, fixed fractional 1 ETH = 1 internal share, positive valid amounts without a business threshold, no yield/platform fee/share transfer, anytime partial/full principal redemption, no administrator and no special creator withdrawal privilege.
 
-| Stage | Status | Deliverable |
+Backend remains Flask, frontend vanilla English HTML/CSS/JS; Hardhat and VS Code for development, Render for hosting. Node.js remains tooling. Metadata registration requires the deploying wallet's signature and a verified successful creation of the supported contract.
+
+## Implementation and delivery stages
+
+| Stage | Current status | Deliverable |
 | --- | --- | --- |
-| P0 Requirements | Complete | Confirmed decisions and source requirement coverage |
-| P1 System/business design | Complete | `docs/ARCHITECTURE.md`, contract invariants and public API |
-| P2 Contract implementation | Complete; local tests pass | `contracts/MicroInvest.sol`, adversarial tests, artifact/export tooling |
-| P3 Flask backend | Complete; local tests pass | Real state/event/receipt APIs, validation, bounded history, safe errors |
-| P4 Frontend/integration | Complete; local browser checks pass | Wallet connection, deposit, position, partial/full exit, status/history, responsive English UI |
-| P5 Deployment | Complete; student reports successful MetaMask tests on Render; public API and receipts verified | Public Render URL, `deployments/sepolia.json`, `docs/evidence/`, local runner and `render.yaml` |
-| P6 Report and handoff | Complete: editable LaTeX, seven originals, compiled 8-page PDF and handoff bundle; course submission remains | `report/MicroInvest_Report.tex`, `report/MicroInvest_Report.pdf`, `report/MicroInvest_LaTeX.zip`, screenshot/submission checklists, README, evaluation notes and CI |
+| P0 Requirements | Complete | User confirmed existing contract rules, independent detail pages and PostgreSQL |
+| P1 Design | Complete | Separate metadata/chain responsibilities; project/account scope; docs/ARCHITECTURE.md |
+| P2 Contract | Complete; business code unchanged | Existing artifact reused per user deployment; original contract remains valid |
+| P3 Backend/database | Implemented; 47 local cases pass | Catalog, signed registration, literal paginated search, project-scoped blockchain APIs, SQL schema/export |
+| P4 UI/integration | Implemented; 23 local browser checks and 4 amount tests pass | Create, registration retry, discovery, creator filter, independent position/activity and shared wallet menu |
+| P5 Updated online deployment | Pending student PostgreSQL setup, source push and Render redeploy | docs/RENDER_UPDATE.md and USER_ACTIONS.md |
+| P5 Actual updated acceptance | Pending real MetaMask/Sepolia checks on the updated site | Two creators, two projects, cross-project participation and restart recovery |
+| P6 Updated report/submission | Pending new live evidence and report revision | Existing 8-page report is version 1, not current multi-investment evidence |
 
-The live Sepolia address is `0xE560121978f80c390f6B0d091E9579A2812Cb3DD`, deployment block `11856501`. The public application is https://sc6113-developemnt-coursework.onrender.com/. On 2026-10-07, the student confirmed all functional tests passed on Render. Separate read-only checks verified the home page, configuration, health, pool, position, history and three successful business receipts. The report identifies Ji Chengyu, G2608005K; its 13 required sections include the existing security controls specified in Word. All seven originals are saved with hashes and accurate captions. The API's 0.04 ETH snapshot at block 11857366 precedes the zero-position redemption at block 11857372. The final PDF has 8 pages and passed page count, section/image coverage, citation, boundary and visual checks. Compilation evidence is in `docs/evidence/report-build-2026-10-07.json`. Only final student review and course submission remain.
+Local browser tests use a real Hardhat chain, real Flask and a simulated wallet. SQLite restart recovery has passed. Real PostgreSQL integration is configured in CI with a disposable database; it was skipped locally because no PostgreSQL server is available. New-version PostgreSQL/Render/MetaMask success has not been claimed.
 
-## Assignment coverage
+## Requirement coverage
 
-| Requirement | Implementation / evidence |
+| Requirement | Current implementation / evidence |
 | --- | --- |
-| Financial problem and objectives | README and architecture: beginner's fractional contribution, transparent shares and principal exit |
-| Solidity business logic | Caller ledger, total shares, ETH custody, events, strict validation, guarded withdrawals |
-| MetaMask and transactions | Selected authorized signer with network/account checks and receipt lifecycle; student confirms live Render/MetaMask acceptance |
-| Frontend UI | English responsive overview, clear amount controls, fixed ratio/gas explanation, position and activity |
-| Required backend integration | Frontend actively uses Flask public configuration, pool, position, history and receipt APIs |
-| History/confirmation | Chain events and receipts; same-block-safe pagination; latest operation recovery |
-| Error handling | Invalid amounts, wallet rejection, excess exit, mismatched network/code, RPC timeout/failure |
-| Security/evaluation | Meaningful adversarial contract tests, precise amounts, key boundary, gas evidence and stated limits |
-| Source and README | Complete code, lockfile, public build artifacts, setup/deploy/testing instructions |
-| Sepolia and Render | Creation receipt/code verified; hosted API and successful deposit/partial/full redemption receipts recorded in `docs/evidence/` |
-| Report and screenshots | All 13 sections and seven originals included; 8-page PDF compiled and visually checked; editable source ZIP provided |
-| Database | Not used, as selected; restart recovery reads chain |
+| Financial problem/objectives | Beginner-friendly project discovery, exact shares and transparent principal exit |
+| Solidity transactions | Independent copies of the same tested caller ledger, custody, events and guarded withdrawals |
+| Wallet integration | Explicit selected signer for creation, registration message, deposit and redemption |
+| Frontend | English dark responsive discovery/create/detail/history pages and five-row recent activity |
+| Backend integration | Used directory APIs and actual scoped pool/position/history/receipt APIs |
+| Metadata/database | PostgreSQL catalog storing ID/name/description/address/deployment/creator; docs/schema.sql and public export tool |
+| Input/error handling | Invalid text/amounts, rejected wallet requests, wrong signer/network/code, conflicting registration, RPC/database errors |
+| Tests/evaluation | 47 local backend tests, 4 amount tests, 23 browser checks; earlier 12 unchanged contract tests; CI PostgreSQL check awaits execution |
+| Source/README | Dependencies, lockfile/artifact, setup, database and Render commands, CI and handoff |
+| Deployment/evidence | Original Sepolia/Render evidence retained; updated online acceptance pending |
+| Report/screenshots | Version 1 originals/PDF retained; current architecture and new live evidence must replace outdated single-pool/no-database descriptions |
 
-Keep the scope simple. No additional investment product, earnings feature or administrator has been introduced. Service plan, account credentials, GitHub visibility and course submission details remain student choices.
+## Preserved version 1 evidence
+
+Original contract: 0xE560121978f80c390f6B0d091E9579A2812Cb3DD; deployment block 11856501. Existing website: https://sc6113-developemnt-coursework.onrender.com/.
+
+The student previously confirmed successful real MetaMask testing on Render; independent public API and deposit/partial/full redemption receipts are in docs/evidence/. The original 8-page English report for Ji Chengyu, G2608005K contains 13 required sections and seven original screenshots. Its PDF/source ZIP remain unchanged as historical version 1 artifacts. New code does not invalidate those actual transactions, but they do not establish deployment or acceptance of the new directory.
+
+Next: follow USER_ACTIONS.md to configure PostgreSQL and redeploy, collect new live screenshots, then revise the report and submit source/database material/README/screenshots/PDF. No video is required. Database/service plans, credentials and course submission details remain student choices.

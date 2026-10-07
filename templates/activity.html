@@ -8,15 +8,16 @@
   <script src="/static/vendor/ethers.umd.min.js" defer></script>
   <script src="/static/activity.js" type="module"></script>
 </head>
-<body>
+<body data-investment-id="{{ investment.id if investment else '' }}">
   <header class="header shell">
     <a class="brand" href="/" aria-label="MicroInvest home"><span class="brand-mark" aria-hidden="true">m<span>i</span></span>MicroInvest</a>
     <nav aria-label="Main navigation"><span id="network-badge" class="network"><span class="dot"></span>Sepolia</span>{% include '_wallet_menu.html' %}</nav>
   </header>
   <main class="shell activity-page">
-    <a class="back-link" href="/">← Back to overview</a>
+    <a class="back-link" href="{{ investment.url if investment else '/' }}">← Back to investment</a>
     <section class="activity-intro">
       <p class="eyebrow">ON-CHAIN RECORDS</p><h1>All your activity</h1>
+      {% if investment %}<p class="project-description">{{ investment.name }} · Investment #{{ investment.id }}</p>{% endif %}
       <p class="muted">Your confirmed deposits and redemptions, newest first. Load older activity to browse the complete history.</p>
     </section>
     <p id="page-message" class="notice error hidden" role="status" aria-live="polite"></p>
