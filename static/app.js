@@ -1,5 +1,6 @@
 import { parseAmount, formatAmount, walletError } from "./numbers.js";
 import { renderActivityRows } from "./activity-table.js";
+import { latestActivity } from "./latest-activity.js";
 import { scopedApi, activityPath } from "./investment-context.js";
 import { createWalletMenu, connectedAccounts, authorizeAccounts, preferredAccount, rememberAccount } from "./wallet-menu.js";
 
@@ -7,7 +8,7 @@ const HOME_ACTIVITY_LIMIT = 5;
 
 const $ = (id) => document.getElementById(id);
 const state = { config: null, wallet: null, provider: null, position: null, busy: false,
-  accounts: [], walletBusy: false, cursor: null, items: [], tx: null, generation: 0, historyBusy: false };
+  accounts: [], walletBusy: false, cursor: null, items: [], tx: null, generation: 0, historyBusy: false, historyFailed: false };
 const storageKey = () => state.wallet && state.config ? ["microinvest", state.config.chainId, state.config.contractAddress, state.wallet.toLowerCase()].join(":") : null;
 const walletMenu = createWalletMenu({ onConnect: connect, onSelect: selectAccount,
   onManage: async () => {
@@ -109,24 +110,32 @@ function renderHistory() {
   renderActivityRows($("history-body"), state.items.slice(0, HOME_ACTIVITY_LIMIT), state.config?.explorerUrl);
   $("history-empty").classList.toggle("hidden", state.items.length > 0);
   $("history-empty").textContent = !state.wallet ? "Connect your wallet to see your activity."
-    : state.cursor ? "No recent activity. View all activity to browse older records." : "No confirmed activity yet.";
+    : state.historyFailed ? "Activity query unavailable. Press refresh to retry."
+    : state.historyBusy ? "Looking for your latest confirmed transactions…" : "No confirmed activity yet.";
   $("view-all-activity").href = state.wallet ? activityPath + "?wallet=" + encodeURIComponent(state.wallet) : activityPath;
 }
 async function history() {
   if (!state.wallet || !state.config.configured || state.historyBusy) return;
   const wallet = state.wallet, generation = state.generation;
-  state.historyBusy = true;
+  state.historyBusy = true; state.historyFailed = false; renderHistory();
   $("history-state").textContent = "Reading on-chain activity…";
   try {
-    const result = await api("/api/history/" + wallet + "?limit=" + HOME_ACTIVITY_LIMIT);
-    if (generation !== state.generation) return;
+    const result = await latestActivity((cursor, limit) => api("/api/history/" + wallet + "?limit=" + limit
+      + (cursor ? "&cursor=" + encodeURIComponent(cursor) : "")), HOME_ACTIVITY_LIMIT, {
+      isCurrent: () => generation === state.generation,
+      onPage: page => {
+        state.cursor = page.nextCursor; state.items = page.items; renderHistory();
+        if (page.nextCursor && page.items.length < HOME_ACTIVITY_LIMIT) $("history-state").textContent = "Checking older activity · " + page.items.length + " transaction(s) found…";
+      },
+    });
+    if (!result) return;
     state.cursor = result.nextCursor;
     state.items = result.items.slice(0, HOME_ACTIVITY_LIMIT);
     renderHistory();
-    $("history-state").textContent = "Showing " + state.items.length + " recent record" + (state.items.length === 1 ? "" : "s") + (state.cursor ? " · More available" : "");
+    $("history-state").textContent = "Showing " + state.items.length + " latest confirmed transaction" + (state.items.length === 1 ? "" : "s");
   } catch (error) {
-    if (generation === state.generation) { $("history-state").textContent = error.message; $("history-empty").textContent = "Activity query unavailable. Press refresh to retry."; }
-  } finally { if (generation === state.generation) state.historyBusy = false; }
+    if (generation === state.generation) { state.historyFailed = true; $("history-state").textContent = error.message; }
+  } finally { if (generation === state.generation) { state.historyBusy = false; renderHistory(); } }
 }
 async function refresh() {
   if (!state.config?.configured) return;
@@ -167,7 +176,7 @@ async function selectAccount(accounts, selected = null) {
   state.generation++; state.wallet = state.accounts.find(account => account.toLowerCase() === selected?.toLowerCase()) || state.accounts[0] || null;
   const generation = state.generation;
   state.provider = null;
-  state.items = []; state.cursor = null; state.tx = null; state.historyBusy = false;
+  state.items = []; state.cursor = null; state.tx = null; state.historyBusy = false; state.historyFailed = false;
   $("transaction-box").classList.add("hidden"); $("form-message").textContent = "";
   clearPosition(); renderHistory();
   walletMenu.setAccounts(state.accounts, state.wallet);
@@ -277,7 +286,7 @@ async function boot() {
       window.ethereum.on?.("accountsChanged", (accounts) => void selectAccount(accounts).catch((error) => notice(error.message)));
       window.ethereum.on?.("chainChanged", () => {
         state.generation++; state.provider = null; clearPosition();
-        state.items = []; state.cursor = null; state.historyBusy = false; renderHistory();
+        state.items = []; state.cursor = null; state.historyBusy = false; state.historyFailed = false; renderHistory();
         notice("Wallet network changed. Open the wallet menu and choose Reconnect wallet.");
       });
       window.ethereum.on?.("disconnect", () => void selectAccount([]));

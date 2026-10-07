@@ -11,6 +11,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from microinvest.chain import ApiError, ChainService, Settings, address
 from microinvest.catalog import Catalog, metadata_input, registration_message, registration_signer
+from microinvest.history import HistoryStore
 
 ROOT = Path(__file__).resolve().parent
 
@@ -69,6 +70,7 @@ def create_app(overrides=None, service=None):
         database_url = "sqlite:///" + (ROOT / "instance" / "catalog.sqlite3").as_posix()
     try:
         catalog = Catalog(database_url)
+        history_store = HistoryStore(catalog.engine)
         if configured_address and deployment_block is not None:
             is_manifest = configured_address.lower() == manifest.get("address", "").lower()
             catalog.seed({"address": configured_address, "deploymentBlock": deployment_block,
@@ -77,6 +79,7 @@ def create_app(overrides=None, service=None):
     except (SQLAlchemyError, ValueError):
         raise RuntimeError("The investment database could not be initialized. Check DATABASE_URL and connectivity.") from None
     app.extensions["catalog"] = catalog
+    app.extensions["history"] = history_store
 
     def selected_investment():
         value = request.args.get("investment")
@@ -168,7 +171,7 @@ def create_app(overrides=None, service=None):
             limit = int(request.args.get("limit", "20"))
         except ValueError:
             raise ApiError("invalid_limit", "History limit must be an integer.") from None
-        return selected_chain().history(wallet, request.args.get("cursor"), limit)
+        return history_store.history(selected_chain(), wallet, request.args.get("cursor"), limit)
 
     @app.get("/api/transactions/<value>")
     @chain_route

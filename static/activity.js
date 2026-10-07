@@ -1,5 +1,6 @@
 import { walletError } from "./numbers.js";
 import { renderActivityRows } from "./activity-table.js";
+import { latestActivity } from "./latest-activity.js";
 import { scopedApi, activityPath } from "./investment-context.js";
 import { createWalletMenu, connectedAccounts, authorizeAccounts, preferredAccount, rememberAccount } from "./wallet-menu.js";
 
@@ -47,14 +48,24 @@ async function loadHistory(reset = false) {
   if (state.busy || !state.wallet || !state.config?.configured || (!reset && !state.cursor)) return;
   const wallet = state.wallet, generation = state.generation;
   const cursor = reset ? null : state.cursor;
+  const existing = reset ? [] : state.items;
   state.busy = true; state.failed = false;
   if (reset) { state.items = []; state.cursor = null; }
   render(); notice();
   $("history-state").textContent = "Reading on-chain activity…";
   try {
-    const result = await api("/api/history/" + wallet + "?limit=20" + (cursor ? "&cursor=" + encodeURIComponent(cursor) : ""));
-    if (generation !== state.generation) return;
-    state.items = reset ? result.items : [...state.items, ...result.items];
+    const result = await latestActivity((next, limit) => {
+      const boundary = next === null ? cursor : next;
+      return api("/api/history/" + wallet + "?limit=" + limit + (boundary ? "&cursor=" + encodeURIComponent(boundary) : ""));
+    }, 20, {
+      isCurrent: () => generation === state.generation,
+      onPage: page => {
+        state.items = [...existing, ...page.items]; state.cursor = page.nextCursor; render();
+        $("history-state").textContent = "Reading on-chain activity · " + state.items.length + " record(s) loaded…";
+      },
+    });
+    if (!result) return;
+    state.items = [...existing, ...result.items];
     state.cursor = result.nextCursor;
     $("history-state").textContent = state.items.length + " record" + (state.items.length === 1 ? "" : "s") + " loaded · "
       + (state.cursor ? "Older activity available" : "All activity loaded");

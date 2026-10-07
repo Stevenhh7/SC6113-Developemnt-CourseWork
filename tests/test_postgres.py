@@ -9,6 +9,8 @@ from sqlalchemy.engine import make_url
 
 from microinvest.catalog import Catalog
 from microinvest.chain import ApiError
+from microinvest.history import HistoryStore
+from sqlalchemy import func, select
 
 
 @pytest.mark.skipif(not os.getenv("TEST_DATABASE_URL"), reason="No disposable PostgreSQL test database configured")
@@ -43,6 +45,21 @@ def test_postgresql_registration_search_restart_and_concurrent_seed():
         store.engine.dispose()
         store = Catalog(scoped_url)
         assert store.get(project["id"], 11155111) == project
+        history = HistoryStore(store.engine)
+        scope = {"chain_id": 11155111, "address": other["address"], "wallet": deployment["deployer"]}
+        item = {"transactionHash": "0x" + "cc" * 32, "logIndex": 0, "blockNumber": 21,
+                "blockHash": "0x" + "dd" * 32, "type": "deposit", "amountWei": "1000000000000001",
+                "sharesAfter": "0.001000000000000001", "timestamp": 1700000000}
+        history.save(scope, [item], 20, 21, item["blockHash"])
+        history.save(scope, [item], 20, 21, item["blockHash"])
+        with store.engine.connect() as connection:
+            assert connection.scalar(select(func.count()).select_from(history.events)) == 1
+            row = connection.execute(select(history.events)).mappings().one()
+            assert row["amount_wei"] == "1000000000000001"
+        store.engine.dispose()
+        store = Catalog(scoped_url)
+        history = HistoryStore(store.engine)
+        assert history.coverage(scope)[1] == [[20, 21]]
     finally:
         if store is not None:
             store.engine.dispose()

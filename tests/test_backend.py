@@ -150,6 +150,23 @@ def test_empty_recent_range_keeps_an_older_range_cursor(service):
     assert result["items"] == []
     assert result["nextCursor"] == "28:0"
     assert result["scannedFrom"] == 28
+    older = service.history(WALLET, cursor=result["nextCursor"])
+    assert older["scannedTo"] == 27
+    assert older["nextCursor"] == "25:0"
+
+
+def test_single_block_history_pages_advance_and_retain_log_zero(service):
+    service.settings.page_blocks = 1
+    service.w3.eth.block_number = 12
+    service.w3.eth.get_block.return_value = {"timestamp": 1700000000}
+    logs = [event_log(0, 12), event_log(0, 11)]
+    service.w3.eth.get_logs.side_effect = lambda query: [
+        log for log in logs if query["fromBlock"] <= log["blockNumber"] <= query["toBlock"]]
+    first = service.history(WALLET, limit=1)
+    second = service.history(WALLET, cursor=first["nextCursor"], limit=1)
+    third = service.history(WALLET, cursor=second["nextCursor"], limit=1)
+    assert [row["blockNumber"] for page in (first, second, third) for row in page["items"]] == [12, 11]
+    assert third["nextCursor"] is None
 
 
 def test_exact_decimal_formatting():

@@ -1,0 +1,78 @@
+{
+  "checkedAtUtc": "2026-10-07T13:48:12.874843+00:00",
+  "backendTests": 54,
+  "frontendTests": 9,
+  "browserChecks": 24,
+  "postgresIntegration": "not run locally; configured in CI",
+  "localSepoliaHistoryResponse": {
+    "items": [
+      {
+        "amountEth": "0.04",
+        "amountWei": "40000000000000000",
+        "blockHash": "0x4c631246add99b449e2b91d7cd01b68818a15fbfade3c9c1b324d82f7c70abee",
+        "blockNumber": 11857372,
+        "confirmations": 6012,
+        "logIndex": 34,
+        "sharesAfter": "0",
+        "timestamp": 1791308340,
+        "transactionHash": "0xb5fc592ccafcfbc8a5724b5384df947e7083c11028f2d01aadaa6d50962bafec",
+        "type": "withdrawal"
+      },
+      {
+        "amountEth": "0.04",
+        "amountWei": "40000000000000000",
+        "blockHash": "0x298aceec104ef1992a347b98b52820ab3f04438fa8e90561c527c8bb8b568a14",
+        "blockNumber": 11857327,
+        "confirmations": 6057,
+        "logIndex": 47,
+        "sharesAfter": "0.04",
+        "timestamp": 1791307776,
+        "transactionHash": "0x3cb200410d40d8d587865a1f93890d6cd21b7d548e8a883659be3260af4e61f8",
+        "type": "deposit"
+      },
+      {
+        "amountEth": "0.03",
+        "amountWei": "30000000000000000",
+        "blockHash": "0xb97a55637291559bbf989255a35707cdbeb66c3b1a5c108737bf0ae21c042a2c",
+        "blockNumber": 11856897,
+        "confirmations": 6487,
+        "logIndex": 92,
+        "sharesAfter": "0",
+        "timestamp": 1791302424,
+        "transactionHash": "0x039d0ff1bd7d039e8b5ed7fee2704c8f57686236041368d8bc29829c543a4be8",
+        "type": "withdrawal"
+      },
+      {
+        "amountEth": "0.03",
+        "amountWei": "30000000000000000",
+        "blockHash": "0x462d7b01e5fbc714772a5896cd422c4c51be769edb2eff80d1b03395552028b0",
+        "blockNumber": 11856893,
+        "confirmations": 6491,
+        "logIndex": 72,
+        "sharesAfter": "0.03",
+        "timestamp": 1791302376,
+        "transactionHash": "0xd88ece103eb7a85f0552fd46c23c0cedf785ea1f903c90b405b887b3b545741d",
+        "type": "withdrawal"
+      },
+      {
+        "amountEth": "0.04",
+        "amountWei": "40000000000000000",
+        "blockHash": "0xc3a2114c960abd1d7484d1188f89322d5204189767d4ebff08a857b45dc7edd9",
+        "blockNumber": 11856891,
+        "confirmations": 6493,
+        "logIndex": 28,
+        "sharesAfter": "0.06",
+        "timestamp": 1791302352,
+        "transactionHash": "0xcbc9bf36566d0cf9af0c81f579473aefa452e7e3772545aeeb73aa381ee8dcb0",
+        "type": "deposit"
+      }
+    ],
+    "latestBlock": 11863383,
+    "nextCursor": "11856891:28",
+    "scannedFrom": 11856501,
+    "scannedTo": 11863383,
+    "source": "database"
+  },
+  "hostedHistoryIndexUpdate": "not deployed by this task",
+  "originalTransactionPresent": true
+}

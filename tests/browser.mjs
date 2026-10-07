@@ -190,6 +190,13 @@ try {
   assert.deepEqual(displayed,complete.slice(0,5).map(item=>shortHash(item.transactionHash)));
   assert.equal(await page.locator("#load-history").count(),0);
   mark("Overview displays only the newest five confirmed records");
+  await provider.send("hardhat_mine", ["0x1770"]);
+  assert.equal((await (await fetch(origin+"/api/history/"+await signer.getAddress()+"?limit=5")).json()).items.length,0);
+  await page.reload();
+  await page.locator("#connect-button").click();
+  await waitUntil(async()=>(await page.locator("#history-state").textContent()).includes("Showing 5 latest"));
+  assert.deepEqual(await page.locator("#history-body tr td:last-child a").allTextContents(),displayed);
+  mark("Overview restores the latest five after 6000 inactive blocks without requiring new transactions");
   await page.locator("#view-all-activity").click();
   await waitUntil(async()=>await page.locator("#history-body tr").count()===20);
   assert.match(page.url(),/\/investments\/\d+\/activity\?wallet=/);

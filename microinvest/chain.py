@@ -125,6 +125,36 @@ class ChainService:
             "walletBalanceWei": str(balance), "walletBalanceEth": units(balance),
         }
 
+    def history_events(self, wallet, start, end, latest):
+        """Decode all confirmed events in one bounded range for the history index."""
+        wallet = address(wallet)
+        logs = []
+        investor_topic = "0x" + wallet[2:].lower().rjust(64, "0")
+        for first in range(start, end + 1, self.settings.chunk):
+            logs.extend(self.w3.eth.get_logs({
+                "address": self.contract.address,
+                "fromBlock": first, "toBlock": min(end, first + self.settings.chunk - 1),
+                "topics": [list(self.event_abis), investor_topic],
+            }))
+        logs.sort(key=lambda log: (log["blockNumber"], log["logIndex"]), reverse=True)
+        blocks = {}
+        items = []
+        for log in logs:
+            event = get_event_data(self.w3.codec, self.event_abis[Web3.to_hex(log["topics"][0])], log)
+            number = log["blockNumber"]
+            if number not in blocks:
+                blocks[number] = self.w3.eth.get_block(number)["timestamp"]
+            items.append({
+                "type": "deposit" if event["event"] == "Deposited" else "withdrawal",
+                "amountWei": str(event["args"]["amountWei"]), "amountEth": units(event["args"]["amountWei"]),
+                "sharesAfter": units(event["args"]["sharesAfter"]),
+                "transactionHash": Web3.to_hex(log["transactionHash"]),
+                "blockHash": Web3.to_hex(log["blockHash"]),
+                "blockNumber": number, "logIndex": log["logIndex"], "timestamp": blocks[number],
+                "confirmations": latest - number + 1,
+            })
+        return items
+
     def history(self, wallet, cursor=None, limit=20):
         wallet = address(wallet)
         if not 1 <= limit <= 50:
@@ -136,46 +166,24 @@ class ChainService:
             before = tuple(map(int, cursor.split(":")))
         self.check()
         latest = self.w3.eth.block_number
-        end = min(latest, before[0]) if before else latest
+        # Log indices cannot be negative: a :0 cursor excludes that entire block.
+        end = min(latest, before[0] - (1 if before[1] == 0 else 0)) if before else latest
         deployment = self.settings.deployment_block
         if end < deployment:
             return {"items": [], "nextCursor": None, "latestBlock": latest,
                     "scannedFrom": deployment, "scannedTo": end}
         start = max(deployment, end - self.settings.page_blocks + 1)
-        logs = []
-        investor_topic = "0x" + wallet[2:].lower().rjust(64, "0")
-        for first in range(start, end + 1, self.settings.chunk):
-            logs.extend(self.w3.eth.get_logs({
-                "address": self.contract.address,
-                "fromBlock": first, "toBlock": min(end, first + self.settings.chunk - 1),
-                "topics": [list(self.event_abis), investor_topic],
-            }))
-        logs.sort(key=lambda log: (log["blockNumber"], log["logIndex"]), reverse=True)
+        items = self.history_events(wallet, start, end, latest)
         if before:
-            logs = [log for log in logs if (log["blockNumber"], log["logIndex"]) < before]
-        chosen = logs[:limit]
-        blocks = {}
-        items = []
-        for log in chosen:
-            event = get_event_data(self.w3.codec, self.event_abis[Web3.to_hex(log["topics"][0])], log)
-            number = log["blockNumber"]
-            if number not in blocks:
-                blocks[number] = self.w3.eth.get_block(number)["timestamp"]
-            items.append({
-                "type": "deposit" if event["event"] == "Deposited" else "withdrawal",
-                "amountWei": str(event["args"]["amountWei"]), "amountEth": units(event["args"]["amountWei"]),
-                "sharesAfter": units(event["args"]["sharesAfter"]),
-                "transactionHash": Web3.to_hex(log["transactionHash"]),
-                "blockNumber": number, "logIndex": log["logIndex"], "timestamp": blocks[number],
-                "confirmations": latest - number + 1,
-            })
-        if len(logs) > limit:
+            items = [item for item in items if (item["blockNumber"], item["logIndex"]) < before]
+        chosen = items[:limit]
+        if len(items) > limit:
             last = chosen[-1]
             next_cursor = f"{last['blockNumber']}:{last['logIndex']}"
         else:
             next_cursor = f"{start}:0" if start > deployment else None
         return {
-            "items": items, "nextCursor": next_cursor, "latestBlock": latest,
+            "items": chosen, "nextCursor": next_cursor, "latestBlock": latest,
             "scannedFrom": start, "scannedTo": end,
         }
 

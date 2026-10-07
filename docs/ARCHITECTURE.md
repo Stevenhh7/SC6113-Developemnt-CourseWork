@@ -9,7 +9,7 @@ flowchart LR
     M --> S[Sepolia: independent pool contracts]
     UI -->|Public reads and signed project registration| F[Flask on Render]
     F -->|Verify creation, read state / events / receipts| S
-    F -->|Store / search project metadata| DB[PostgreSQL]
+    F -->|Store / search metadata and confirmed events| DB[PostgreSQL]
 ~~~
 
 Flask holds no wallet signing key and sends no chain transaction. PostgreSQL is authoritative for the project directory; Solidity state/events are authoritative for principal, shares and confirmed business activity. Removing or losing directory data does not transfer on-chain funds, but makes project discovery/pages unavailable until metadata is restored.
@@ -92,14 +92,20 @@ The client obtains the exact message first, signs it with getSigner(selectedAddr
 
 Controlled failures use {"error":{"code":"...","message":"..."}}. Validation is 400, unsupported JSON media 415, wrong deployer 403, unknown project 404, pending creation/conflicting registration 409 and unavailable RPC/database 503. Exception class alone is logged; raw provider/database credential strings are not returned. Unavailable balances are never shown as zero.
 
-Every chain read validates network and runtime code. State reads use a snapshot block. History scans bounded block windows and bounded eth_getLogs chunks, filters contract + indexed investor, and uses exclusive (blockNumber, logIndex) cursors so same-block events are not skipped. Empty ranges can still have older pages.
+Every chain read validates network and runtime code. State reads use a snapshot block. History synchronizes bounded block windows and eth_getLogs chunks into PostgreSQL, filtered by contract and investor. Events retain exact wei, amount/share snapshots, transaction/log identity, timestamp and block hash. The unique event key prevents duplicate rows. Public history responses are selected from that index using exclusive (blockNumber, logIndex) cursors, including a correct whole-block boundary for log index zero.
 
-The detail overview caps recent rows at five. Full activity uses 20-row cursor pages and safely renders text. Refresh resets pagination; account/network changes clear stale state. Asynchronous generations prevent earlier responses from overwriting another wallet's current page.
+The detail overview automatically walks older ranges until five newest confirmed events are found or the deployment boundary is reached. Full activity similarly fills 20-row pages across empty ranges. Loading/error states are distinct from completed empty history. Refresh resets pagination; account/network changes cancel stale updates.
+
+## Persistent history synchronization
+
+history_events stores confirmed events by network, contract and investor. history_ranges stores completed scan ranges, including empty ranges, and their canonical end-block hash. Both survive application restart in PostgreSQL. On a history request, the server reads covered ranges from the index; missing ranges are fetched once and upserted transactionally. Adjacent known coverage allows incremental reads of only newly mined blocks. Initial older backfill remains bounded per API request and continues through the UI's cursors; it is not a background full-chain crawler.
+
+The latest stored checkpoint is checked against the current chain. If it changed or the node's chain is shorter, that wallet/pool index is cleared and rebuilt from canonical events. A block hash change during scanning aborts the write. RPC failure returns an explicit error without deleting saved rows or claiming an empty history. Current balances and entitlement continue to come directly from the contract, not historical database snapshots. Rejected wallet requests and pending/failed transactions produce no successful event rows.
 
 ## Wallet and deployment boundaries
 
 The account menu exposes only addresses returned by MetaMask. A stored preference is valid only while still authorized. Before signing, the UI checks network and selected membership, then explicitly selects that signer. Creators can also participate in any pool and redeem only their own position. Other participants cannot register creator metadata or redeem another holder's principal.
 
-Title/description are escaped by Jinja or rendered with textContent. Local script bundles and a restrictive Content Security Policy remain in place. Backend RPC/database secrets stay in environment settings. PostgreSQL stores public addresses and project text, not private keys, balances or identities.
+Title/description are escaped by Jinja or rendered with textContent. Local script bundles and a restrictive Content Security Policy remain in place. Backend RPC/database secrets stay in environment settings. PostgreSQL stores public addresses, project text and historical event snapshots, not private keys or identity profiles. Current balances remain on-chain.
 
 Render uses Python/Gunicorn and PostgreSQL, with no Node backend or SQLite persistence. DATABASE_URL is mandatory PostgreSQL online. A directory outage blocks project lookup; RPC failure blocks chain-dependent controls. Single-confirmation status is not finality. Moderation, edit workflows, on-chain metadata anchoring, authentication profiles, yield strategies and production audit/load testing remain outside scope.

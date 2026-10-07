@@ -2,7 +2,7 @@
 
 This update changes the home page from one pool to a searchable directory. Keep the existing Python service and original Sepolia contract. New contracts are created by users' MetaMask wallets and registered in PostgreSQL; no contract factory or backend signing key is needed.
 
-The implementation and local tests are complete. The updated source has not been pushed/deployed by this task, and this host has not connected to your live PostgreSQL database.
+The implementation and local tests are complete. The student has deployed the multi-investment version; public directory/pool APIs were checked. The subsequent history-index update still needs source push/redeploy. This host has not connected directly to your live PostgreSQL database.
 
 ## 1. Create PostgreSQL
 
@@ -37,11 +37,13 @@ Start command:
 python scripts/init-catalog.py && gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120
 ~~~
 
-Keep Root Directory empty and health check /healthz. The initializer creates the table and imports the original pool before Gunicorn workers start. If you previously entered the start command manually, update it in the Dashboard: committing render.yaml alone does not change a manually configured service.
+Keep Root Directory empty and health check /healthz. The initializer creates missing catalog/history tables and imports the original pool before Gunicorn workers start. If you previously entered the start command manually, update it in the Dashboard: committing render.yaml alone does not change a manually configured service.
 
 The program refuses a blank or SQLite DATABASE_URL on Render. If initialization fails, check database availability, region and URL in Render settings. The error intentionally excludes the connection string.
 
 ## 3. Push and deploy
+
+For the later history-index update, keep the PostgreSQL URL and existing start command. Startup creates the missing history_events and history_ranges tables automatically; existing project metadata is retained. Push/redeploy the changed code, then open the original project's overview and full activity to let bounded backfill populate confirmed records. No new contract or transaction is needed to restore old history.
 
 Review changed files, commit and push them to the existing repository. Keep .env, instance/, test-results/ and wallet files out of Git. Redeploy the service after both DATABASE_URL and the new start command are set.
 
@@ -83,4 +85,4 @@ The existing 8-page report and seven screenshots describe version 1 (single pool
 
 Do not include DATABASE_URL/RPC credentials. Existing wallet/invalid-input screenshots can remain as historical evidence if the revised captions identify the version. The PDF needs an updated architecture/database description and current test evidence.
 
-For the database part of source submission, include docs/schema.sql and a reviewed public metadata export from scripts/export-catalog.py. Running that script locally with blank DATABASE_URL exports only the local catalog; use the final PostgreSQL connection to collect the hosted rows. Render's internal URL is for hosted connections; local access uses its external URL/settings. The export is public metadata, not a full backup.
+For the database part of source submission, include docs/schema.sql and a reviewed public metadata export from scripts/export-catalog.py --include-history. Running that script locally with blank DATABASE_URL exports only the local catalog; use the final PostgreSQL connection to collect the hosted rows. Render's internal URL is for hosted connections; local access uses its external URL/settings. The export is public metadata, not a full backup.

@@ -4,7 +4,7 @@ This repository is the user-confirmed target inside Course. It implements the SC
 
 ## Current confirmed scope
 
-Investing beginners; any authorized wallet can create its own independent Investment contract and supply a title/explanation. Search by name or related words, open a project-specific detail page and participate in that contract. PostgreSQL stores the online directory; local SQLite is a development fallback.
+Investing beginners; any authorized wallet can create its own independent Investment contract and supply a title/explanation. Search by name or related words, open a project-specific detail page and participate in that contract. PostgreSQL stores the online directory and an index of confirmed events; local SQLite is a development fallback.
 
 Each contract retains the agreed rules: Sepolia test ETH, fixed fractional 1 ETH = 1 internal share, positive valid amounts without a business threshold, no yield/platform fee/share transfer, anytime partial/full principal redemption, no administrator and no special creator withdrawal privilege.
 
@@ -17,9 +17,9 @@ Backend remains Flask, frontend vanilla English HTML/CSS/JS; Hardhat and VS Code
 | P0 Requirements | Complete | User confirmed existing contract rules, independent detail pages and PostgreSQL |
 | P1 Design | Complete | Separate metadata/chain responsibilities; project/account scope; docs/ARCHITECTURE.md |
 | P2 Contract | Complete; business code unchanged | Existing artifact reused per user deployment; original contract remains valid |
-| P3 Backend/database | Implemented; 47 local cases pass | Catalog, signed registration, literal paginated search, project-scoped blockchain APIs, SQL schema/export |
-| P4 UI/integration | Implemented; 23 local browser checks and 4 amount tests pass | Create, registration retry, discovery, creator filter, independent position/activity and shared wallet menu |
-| P5 Updated online deployment | Pending student PostgreSQL setup, source push and Render redeploy | docs/RENDER_UPDATE.md and USER_ACTIONS.md |
+| P3 Backend/database | Implemented; 54 local cases pass | Catalog, signed registration, scoped blockchain APIs, persistent event/range index, schema/export |
+| P4 UI/integration | Implemented; 24 local browser checks and 9 frontend tests pass | Create, registration retry, discovery, creator filter, independent position/activity and shared wallet menu |
+| P5 Updated online deployment | Multi-investment version deployed by student; public directory/pool checked; later history-index changes need push/redeploy | docs/RENDER_UPDATE.md and USER_ACTIONS.md |
 | P5 Actual updated acceptance | Pending real MetaMask/Sepolia checks on the updated site | Two creators, two projects, cross-project participation and restart recovery |
 | P6 Updated report/submission | Pending new live evidence and report revision | Existing 8-page report is version 1, not current multi-investment evidence |
 
@@ -32,11 +32,11 @@ Local browser tests use a real Hardhat chain, real Flask and a simulated wallet.
 | Financial problem/objectives | Beginner-friendly project discovery, exact shares and transparent principal exit |
 | Solidity transactions | Independent copies of the same tested caller ledger, custody, events and guarded withdrawals |
 | Wallet integration | Explicit selected signer for creation, registration message, deposit and redemption |
-| Frontend | English dark responsive discovery/create/detail/history pages and five-row recent activity |
+| Frontend | English dark responsive discovery/create/detail/history pages and latest five records with automatic older-range synchronization |
 | Backend integration | Used directory APIs and actual scoped pool/position/history/receipt APIs |
 | Metadata/database | PostgreSQL catalog storing ID/name/description/address/deployment/creator; docs/schema.sql and public export tool |
 | Input/error handling | Invalid text/amounts, rejected wallet requests, wrong signer/network/code, conflicting registration, RPC/database errors |
-| Tests/evaluation | 47 local backend tests, 4 amount tests, 23 browser checks; earlier 12 unchanged contract tests; CI PostgreSQL check awaits execution |
+| Tests/evaluation | 54 local backend tests, 9 frontend tests, 24 browser checks; earlier 12 unchanged contract tests; CI PostgreSQL check awaits execution |
 | Source/README | Dependencies, lockfile/artifact, setup, database and Render commands, CI and handoff |
 | Deployment/evidence | Original Sepolia/Render evidence retained; updated online acceptance pending |
 | Report/screenshots | Version 1 originals/PDF retained; current architecture and new live evidence must replace outdated single-pool/no-database descriptions |

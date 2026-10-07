@@ -6,11 +6,11 @@ MicroInvest lets investing beginners discover a named investment, contribute Sep
 
 ## Current version and evidence
 
-The multi-investment version adds wallet deployment and signed registration, a searchable directory, creator filtering and independent investment/activity pages. PostgreSQL stores project metadata on Render; ignored SQLite files support local development. Amounts, shares and confirmed history remain authoritative on-chain. The original Sepolia pool is imported into the directory once.
+The multi-investment version adds wallet deployment and signed registration, a searchable directory, creator filtering and independent investment/activity pages. PostgreSQL stores project metadata and confirmed event history on Render; ignored SQLite files support local development. Principal and shares remain authoritative on-chain; confirmed history is indexed from canonical chain events. The original Sepolia pool is imported into the directory once.
 
-The local update passed 47 backend cases, 4 amount/error tests and 23 browser integration checks on 7 October 2026. The unchanged business contract previously passed 12 contract tests. Browser checks use a real local chain and a simulated wallet. A PostgreSQL integration check is configured in CI; it was not run locally because this host has no PostgreSQL server. See [testing](docs/TESTING.md).
+The local update passed 54 backend cases, 9 frontend amount/history tests and 24 browser integration checks on 7 October 2026. The unchanged business contract previously passed 12 contract tests. Browser checks use a real local chain and a simulated wallet. A PostgreSQL integration check is configured in CI; it was not run locally because this host has no PostgreSQL server. See [testing](docs/TESTING.md).
 
-The existing [Render site](https://sc6113-developemnt-coursework.onrender.com/) and [deployment evidence](docs/DEPLOYMENT.md) describe the previously accepted single-pool version. **The updated version needs PostgreSQL configuration, redeployment and actual MetaMask acceptance.** The existing report PDF/LaTeX/screenshots are also version 1 evidence and need revision after updated live acceptance.
+The original [deployment evidence](docs/DEPLOYMENT.md) describes version 1. The existing [Render site](https://sc6113-developemnt-coursework.onrender.com/) now serves the multi-investment directory. **The student has deployed the multi-investment version, and public directory/pool APIs were checked. The later history-index update needs source push/redeployment and updated acceptance.** The existing report PDF/LaTeX/screenshots are also version 1 evidence and need revision after updated live acceptance.
 
 ## Technology
 
@@ -27,7 +27,7 @@ Important files:
 | contracts/MicroInvest.sol | Identical business rules for every independently deployed pool |
 | contract/MicroInvest.json | ABI, creation bytecode and runtime bytecode |
 | app.py, microinvest/chain.py | Flask routes, scoped blockchain reads and deployment verification |
-| microinvest/catalog.py | Project metadata, signed registration and search |
+| microinvest/catalog.py, microinvest/history.py | Project metadata, search and persistent confirmed-event index |
 | templates/, static/ | Discovery, creation, investment, activity and account menu |
 | scripts/init-catalog.py | Initialize directory before Gunicorn workers start |
 | scripts/export-catalog.py, docs/schema.sql | Public metadata export and PostgreSQL schema for submission |
@@ -80,7 +80,7 @@ A deployment hash is retained if confirmation or registration is interrupted. **
 
 The wallet menu lists only accounts MetaMask exposes to this site. **Manage accounts in MetaMask** authorizes additional accounts; menu selection cannot grant permission by itself. Other users can participate in a creator's pool, but each can redeem only their own position.
 
-Each overview shows at most five recent confirmed records. **View all activity** opens /investments/<id>/activity?wallet=... with 20 records per cursor page. The contract address scopes balances, pending-operation storage and event queries. Unknown project IDs return an error instead of silently selecting another pool.
+Each overview automatically reads older ranges until the latest five confirmed records are found or history is exhausted. Confirmed events and completed scan ranges are stored in PostgreSQL, and later requests synchronize new blocks rather than re-reading all old logs. **View all activity** opens /investments/<id>/activity?wallet=... with 20 records per displayed page; empty block ranges are skipped automatically. The contract address scopes balances, pending-operation storage and event queries. Unknown project IDs return an error instead of silently selecting another pool.
 
 ## Update Render
 
@@ -133,10 +133,10 @@ CI supplies a disposable PostgreSQL 16 database for tests/test_postgres.py. To r
 The SQL schema is [docs/schema.sql](docs/schema.sql). To export public project rows from the configured database for submission:
 
 ~~~powershell
-.\.venv\Scripts\python.exe scripts/export-catalog.py --output test-results/catalog-public.json
+.\.venv\Scripts\python.exe scripts/export-catalog.py --include-history --output test-results/catalog-public.json
 ~~~
 
-Run against the final database (Render Shell if available, or a local connection using Render's external URL) and review the exported rows. The export contains public metadata, no credentials or balances; it is not a full PostgreSQL backup/restore utility. Do not submit the SQLite test/demo directories or database connection strings.
+Run against the final database (Render Shell if available, or a local connection using Render's external URL) and review the exported rows. The export contains public project metadata, indexed transaction events and scan checkpoints, with no credentials; it is not a full PostgreSQL backup/restore utility. Do not submit the SQLite test/demo directories or database connection strings.
 
 See [Plan.md](Plan.md), [architecture](docs/ARCHITECTURE.md), [testing](docs/TESTING.md) and [student actions](USER_ACTIONS.md). Revise the version 1 report/screenshots after new live acceptance so the final PDF describes the current multi-investment database design.
 
@@ -144,4 +144,4 @@ See [Plan.md](Plan.md), [architecture](docs/ARCHITECTURE.md), [testing](docs/TES
 
 All amounts use integer wei/BigInt; positive decimals support up to 18 decimal places. A successful mined receipt, rather than a hash, determines confirmation. Wallet rejection, revert, replacement, cancellation and unknown status remain distinct. The contract protects caller-owned principal with guarded withdrawals and rolls back failed transfers.
 
-Search uses case-folded, parameterized literal matching across name, description, address and creator; multiple words must all match. It is bounded and paginated, but is not fuzzy/semantic search or a large-scale indexer. Metadata requires the deploying wallet's signature; there is no project editing, moderation or profile/login feature. PostgreSQL availability is required to resolve project pages, while chain/RPC availability is required for funds/position/history reads. One mined confirmation is a coursework choice, not Ethereum finality. No commercial audit, throughput benchmark or novice participant study is claimed.
+Search uses case-folded, parameterized literal matching across name, description, address and creator; multiple words must all match. It is bounded and paginated, but is not fuzzy/semantic search or a large-scale indexer. Metadata requires the deploying wallet's signature; there is no project editing, moderation or profile/login feature. PostgreSQL resolves project pages and stores history. RPC remains necessary for balances, incremental event synchronization and canonical checkpoint verification. Stored historical share snapshots are not a current balance source. One mined confirmation is a coursework choice, not Ethereum finality. No commercial audit, throughput benchmark or novice participant study is claimed.

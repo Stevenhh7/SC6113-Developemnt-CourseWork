@@ -2,16 +2,16 @@
 
 ## Observed results: 7 October 2026
 
-The multi-investment update passed **47 backend cases, 4 amount/error tests and 23 browser integration checks** on Windows with Python 3.12, Node.js 24.19.0 and the pinned Solidity 0.8.30/Hardhat 3.18.1 artifact. Browser integration uses installed Edge, a real local chain, real Flask/Web3.py and an automated EIP-1193 wallet simulation.
+The multi-investment update passed **54 backend cases, 9 frontend amount/history tests and 24 browser integration checks** on Windows with Python 3.12, Node.js 24.19.0 and the pinned Solidity 0.8.30/Hardhat 3.18.1 artifact. Browser integration uses installed Edge, a real local chain, real Flask/Web3.py and an automated EIP-1193 wallet simulation.
 
 The PostgreSQL integration case was **skipped locally** because no disposable PostgreSQL server was configured. CI now provisions PostgreSQL 16 and TEST_DATABASE_URL. This is planned CI validation, not an observed passing PostgreSQL or Render run. The unchanged business contract's previous 12-test result remains from 6 October 2026.
 
 | Suite | Observed result | Source |
 | --- | --- | --- |
-| Backend and metadata directory | 47 passed | tests/test_backend.py, tests/test_catalog.py |
+| Backend and metadata directory | 54 passed | tests/test_backend.py, tests/test_catalog.py |
 | Actual PostgreSQL integration | 1 skipped locally; configured in CI | tests/test_postgres.py |
-| Amount/error handling | 4 passed | tests/frontend.test.mjs |
-| Browser integration | 23 checks passed | tests/browser.mjs; docs/evidence/browser-multi-investment-2026-10-07.json |
+| Frontend amounts/history | 9 passed | tests/frontend.test.mjs |
+| Browser integration | 24 checks passed | tests/browser.mjs; docs/evidence/browser-history-index-2026-10-07.json |
 | Business contract | 12 passed on 6 October; unchanged | test/MicroInvest.ts |
 
 Run commands are in README. Backend unit tests mock the RPC boundary; the browser supplies real contract/RPC execution. Local SQLite persistence is tested by recreating the service/database connection. Actual PostgreSQL testing, updated Render acceptance and MetaMask extension behavior remain distinct verification boundaries.
@@ -36,13 +36,16 @@ Additional directory coverage verifies:
 
 The optional PostgreSQL case checks table creation, concurrent original-pool seeding, insert/uniqueness rollback, idempotence, Unicode/literal search, paging/network isolation and metadata recovery after reconnecting. It requires a dedicated database ending in _test and uses an isolated generated schema. It must not be pointed at the coursework database.
 
+The history update adds a block-zero cursor boundary case and six database-index cases: old-range backfill, file-backed restart recovery, incremental new-block synchronization, idempotent same-block events, pool/wallet isolation, canonical checkpoint replacement and preserving data on failed synchronization. A changed block hash during a scan must abort the write. Five frontend tests cover filling across empty/partial pages, true exhaustion, account-change cancellation, upstream failure and non-advancing cursors. The optional PostgreSQL case now also exercises actual event upserts and checkpoint persistence.
+
 ## Browser coverage
 
-All 23 recorded checks are preserved in the evidence JSON. The complete local flow covers:
+All 24 recorded checks are preserved in the evidence JSON. The complete local flow covers:
 
 - Wallet connection/menu permissions, keyboard behavior, rejected permissions, preferred-account reload and correct signing by a non-first authorized account.
 - Valid deposits, exact shares, excess redemption rejection, partial/full exit, rejected transactions and wrong-network recovery.
 - Five newest overview rows and all 21 records through cursor paging without skipped/duplicate rows; account/context updates and mobile layout.
+- After 6,000 inactive local blocks, a fresh page reconnect still displays those five latest events and the complete-history page loads the original records from the persisted index.
 - A named independently deployed contract, actual successful creation and signed registration.
 - A second account's separate project, rejected registration signature, refresh recovery and retry of the same contract/hash.
 - Matching title/description keywords, filtering projects by creator and a 390px search viewport without horizontal overflow.
@@ -59,7 +62,7 @@ The unchanged 12 contract tests cover one-wei/repeated deposits, separate invest
 
 Earlier local receipt gas: first deposit 71,884, partial redemption 50,282 and full redemption 50,272. Independently verified original Sepolia receipts used 245,994 gas for a 0.003 ETH deposit, 53,700 for a 0.001 ETH partial redemption and 50,912 for the 0.002 ETH full exit. Original receipt values are in docs/DEPLOYMENT.md and docs/evidence/. These are historical version 1 observations, not measurements of new project creation/registration or a controlled cross-environment comparison. Actual gas cost is gasUsed × effectiveGasPrice; metadata signatures spend no chain gas.
 
-State reads are constant-sized. Chain history remains bounded by configured block/chunk limits. The metadata catalog is not an event indexer. Search uses paged literal matching; no load test, throughput benchmark, actual PostgreSQL latency result or user-study finding is claimed.
+State reads are constant-sized. Chain history remains bounded by configured block/chunk limits. Confirmed history now has a persistent event index and synchronization checkpoints; it is not a continuously running full-chain indexer. Search uses paged literal matching; no load test, throughput benchmark, actual PostgreSQL latency result or user-study finding is claimed.
 
 ## Usability and authorization
 
@@ -71,4 +74,6 @@ Security boundaries include caller-owned redemption, guarded transfers, exact am
 
 The student previously reported successful actual MetaMask tests on the original Render site on 7 October 2026. Separate read-only hosted API and Sepolia receipt checks are retained in docs/evidence/live-validation-2026-10-07.json. Seven original student screenshots support that version's report.
 
-Those records remain valid historical evidence but do not prove the multi-investment update is hosted or uses live PostgreSQL. Updated acceptance must cover two creators, independent IDs/contracts, title/description search, another user's participation, isolated redemption/history and catalog persistence across Render redeploy. Updated live screenshots and the report revision remain student follow-up actions.
+The student has now deployed the multi-investment version; public directory and pool APIs were checked. The subsequent history-index code has not yet been deployed, so its hosted synchronization still needs acceptance. Updated acceptance must cover two creators, independent IDs/contracts, title/description search, another user's participation, isolated redemption/history and catalog persistence across Render redeploy. Updated live screenshots and the report revision remain student follow-up actions.
+
+The missing-history symptom was reproduced on the current hosted API: the newest range 11858330–11863329 had no matching events, while the next cursor page returned the original 0.04 ETH redemption in block 11857372 with hash 0xb5fc592ccafcfbc8a5724b5384df947e7083c11028f2d01aadaa6d50962bafec. A subsequent local synchronization of actual Sepolia data stored all ten original pool events in SQLite and returned the latest five from the database. This proves local event recovery, not deployment of the new history index on Render.
